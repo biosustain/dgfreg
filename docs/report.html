@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Teddy Groves">
+<meta name="author" content="Jason Jooste">
+<meta name="author" content="Lars Keld Nielsen">
+
+<title>Hierarchical Bayesian regression modelling predicts biochemical rection energies and facilitates quantitative modelling of cell metabolism</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="report_files/libs/quarto-html/quarto.js"></script>
+<script src="report_files/libs/quarto-html/popper.min.js"></script>
+<script src="report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="report_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="report_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: { equationNumbers: {autoNumber: "AMS"} },
+  tex2jax: {inlineMath: [ ['$','$'], ["\\(","\\)"] ]}
+});
+</script>
+
+<!-- This is what works with Quarto -->
+<script>
+  MathJax = {
+    tex: {
+      tags: 'ams'  // should be 'ams', 'none', or 'all'
+    }
+  };
+</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#abstract" id="toc-abstract" class="nav-link active" data-scroll-target="#abstract">Abstract</a></li>
+  <li><a href="#sec-background" id="toc-sec-background" class="nav-link" data-scroll-target="#sec-background">Background</a>
+  <ul class="collapse">
+  <li><a href="#sec-thermodynamic-effect" id="toc-sec-thermodynamic-effect" class="nav-link" data-scroll-target="#sec-thermodynamic-effect">The thermodynamic effect on the rate of a biochemical reaction</a></li>
+  <li><a href="#standard-condition-delta_rg-measurements" id="toc-standard-condition-delta_rg-measurements" class="nav-link" data-scroll-target="#standard-condition-delta_rg-measurements">Standard condition <span class="math inline">\(\Delta_rG\)</span> measurements</a></li>
+  <li><a href="#the-reactant-contribution-model" id="toc-the-reactant-contribution-model" class="nav-link" data-scroll-target="#the-reactant-contribution-model">The reactant contribution model</a>
+  <ul class="collapse">
+  <li><a href="#sec-reformulation-using-sufficient-statistics" id="toc-sec-reformulation-using-sufficient-statistics" class="nav-link" data-scroll-target="#sec-reformulation-using-sufficient-statistics">Reformulation using sufficient statistics</a></li>
+  </ul></li>
+  <li><a href="#the-group-contribution-model" id="toc-the-group-contribution-model" class="nav-link" data-scroll-target="#the-group-contribution-model">The group contribution model</a></li>
+  <li><a href="#the-component-contribution-model" id="toc-the-component-contribution-model" class="nav-link" data-scroll-target="#the-component-contribution-model">The component contribution model</a></li>
+  </ul></li>
+  <li><a href="#sec-theoretical-problems-with-the-group-contribution-model" id="toc-sec-theoretical-problems-with-the-group-contribution-model" class="nav-link" data-scroll-target="#sec-theoretical-problems-with-the-group-contribution-model">Theoretical problem with the group contribution model</a></li>
+  <li><a href="#sec-methods" id="toc-sec-methods" class="nav-link" data-scroll-target="#sec-methods">Methods</a>
+  <ul class="collapse">
+  <li><a href="#sec-how-big-is-the-problem" id="toc-sec-how-big-is-the-problem" class="nav-link" data-scroll-target="#sec-how-big-is-the-problem">How big is the problem?</a></li>
+  <li><a href="#sec-improved-group-contribution-model" id="toc-sec-improved-group-contribution-model" class="nav-link" data-scroll-target="#sec-improved-group-contribution-model">Improved group contribution model</a></li>
+  <li><a href="#sec-hierarchical-component-contribution-model" id="toc-sec-hierarchical-component-contribution-model" class="nav-link" data-scroll-target="#sec-hierarchical-component-contribution-model">Hierarchical component contribution model</a>
+  <ul class="collapse">
+  <li><a href="#sec-qr-reparameterisation" id="toc-sec-qr-reparameterisation" class="nav-link" data-scroll-target="#sec-qr-reparameterisation">QR reparameterisation</a></li>
+  </ul></li>
+  <li><a href="#sec-unmodelled-compounds" id="toc-sec-unmodelled-compounds" class="nav-link" data-scroll-target="#sec-unmodelled-compounds">Estimating formation energies for unmeasured or unmodelled compounds</a></li>
+  <li><a href="#using-our-results-for-downstream-modelling" id="toc-using-our-results-for-downstream-modelling" class="nav-link" data-scroll-target="#using-our-results-for-downstream-modelling">Using our results for downstream modelling</a></li>
+  <li><a href="#sec-case-study" id="toc-sec-case-study" class="nav-link" data-scroll-target="#sec-case-study">Model evaluation</a></li>
+  <li><a href="#software" id="toc-software" class="nav-link" data-scroll-target="#software">Software</a></li>
+  </ul></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
+  <ul class="collapse">
+  <li><a href="#mcmc-diagnostics" id="toc-mcmc-diagnostics" class="nav-link" data-scroll-target="#mcmc-diagnostics">MCMC diagnostics</a></li>
+  <li><a href="#assessment-of-model-specification" id="toc-assessment-of-model-specification" class="nav-link" data-scroll-target="#assessment-of-model-specification">Assessment of model specification</a></li>
+  <li><a href="#sec-posterior-distributions-of-interesting-parameters" id="toc-sec-posterior-distributions-of-interesting-parameters" class="nav-link" data-scroll-target="#sec-posterior-distributions-of-interesting-parameters">Posterior distributions of interesting parameters</a></li>
+  <li><a href="#comparison-with-component-contribution" id="toc-comparison-with-component-contribution" class="nav-link" data-scroll-target="#comparison-with-component-contribution">Comparison with component contribution</a></li>
+  <li><a href="#out-of-sample-predictions" id="toc-out-of-sample-predictions" class="nav-link" data-scroll-target="#out-of-sample-predictions">Out of sample predictions</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a>
+  <ul class="collapse">
+  <li><a href="#comparison-with-state-of-the-art" id="toc-comparison-with-state-of-the-art" class="nav-link" data-scroll-target="#comparison-with-state-of-the-art">Comparison with state of the art</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
+  <li><a href="#extensions-and-future-work" id="toc-extensions-and-future-work" class="nav-link" data-scroll-target="#extensions-and-future-work">Extensions and future work</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="report.docx"><i class="bi bi-file-word"></i>MS Word</a></li><li><a href="../report.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Hierarchical Bayesian regression modelling predicts biochemical rection energies and facilitates quantitative modelling of cell metabolism</h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliations</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Teddy Groves <a href="https://orcid.org/0000-0002-7109-3270" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+    <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            DTU Biosustain
+          </p>
+      </div>
+      <div class="quarto-title-meta-contents">
+    <p class="author">Jason Jooste </p>
+  </div>
+    <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            CSIRO
+          </p>
+      </div>
+      <div class="quarto-title-meta-contents">
+    <p class="author">Lars Keld Nielsen </p>
+  </div>
+    <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            DTU Biosustain
+          </p>
+      </div>
+    </div>
+
+<div class="quarto-title-meta">
+
+      
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="abstract-title">Abstract</div>
+    <p>The thermodynamic effect on a biochemical reaction depends principally on the standard-condition Gibbs energy changes of the compounds that the reaction consumes and produces. The state of the art method for estimating these parameters involves a statistical model called group contribution. We highlight a problem with the group contribution model that limits its usefulness in downstream modelling applications: the group contribution model typically produces a rank-deficient uncertainty covariance matrix. We present a new model that avoids this issue, generates more accurate estimates than the current state of the art and has unlimited reaction coverage. Our model includes parameters for both chemical groups and compounds, using a hierarchical component to balance information pertaining to these two levels, and addresses the issue of stoichiometric collinearity using QR decomposition. We provide a Gaussian approximation to our model’s posterior distribution that can be used for downstream modelling. Our results can be replicated straightforwardly by following the instructions at <a href="https://github.com/biosustain/dgfreg" class="uri">https://github.com/biosustain/dgfreg</a>.</p>
+  </div>
+</div>
+
+</header>
+
+<section id="abstract" class="level1">
+<h1>Abstract</h1>
+</section>
+<section id="sec-background" class="level1">
+<h1>Background</h1>
+<section id="sec-thermodynamic-effect" class="level2">
+<h2 class="anchored" data-anchor-id="sec-thermodynamic-effect">The thermodynamic effect on the rate of a biochemical reaction</h2>
+<p>The rate of an enzyme-catalysed reaction is closely related to the reaction’s thermodynamic properties, particularly the standard condition Gibbs free energy of formation, or “formation energy” of each consumed and produced compound. Under standard conditions the overall rate <span class="math inline">\(v\)</span> of a reaction involving <span class="math inline">\(n\in\mathbb{N}\)</span> species depends on formation energies <span class="math inline">\(\Delta_f G\in\mathbb{R}^n\)</span>, as well as stoichiometries <span class="math inline">\(\vec{s}\in\mathbb{R}^n\)</span>, concentrations <span class="math inline">\(c\in\mathbb{R}_+^n\)</span>, temperature <span class="math inline">\(T\in \mathbb{R}_+\)</span>, gas constant <span class="math inline">\(R\approx0.008314\)</span> and non-thermodynamic effects <span class="math inline">\(\psi \in \mathbb{R}_+\)</span> according to equation <span class="math inline">\(\eqref{eq-thermodynamic-effect}\)</span>:</p>
+<p><span class="math display">\[\begin{align}
+v &amp;= reversibility \cdot \psi \label{eq-thermodynamic-effect} \\
+reversibility &amp;= 1 - \exp(\Delta_rG + RT \cdot \frac{\vec{s}^\top\cdot\ln c}{RT}) \nonumber \\
+\Delta_rG &amp;= \vec{s}^\top\cdot \Delta_fG \nonumber
+\end{align}\]</span></p>
+<p>From equation <span class="math inline">\(\eqref{eq-thermodynamic-effect}\)</span> it can be seen that the thermodynamic term <span class="math inline">\(reversibility\)</span> determines the direction of <span class="math inline">\(v\)</span> as well as affecting its magnitude. Accurate quantitative modelling of biochemical fluxes therefore requires careful estimation of formation energies.</p>
+</section>
+<section id="standard-condition-delta_rg-measurements" class="level2">
+<h2 class="anchored" data-anchor-id="standard-condition-delta_rg-measurements">Standard condition <span class="math inline">\(\Delta_rG\)</span> measurements</h2>
+<p>Since not all biochemically important compounds’ formation energies have been directly measured, in order to estimate formation energies it is necessary to rely on measurements of <span class="math inline">\(\Delta_rG\)</span>. <span class="citation" data-cites="beberEQuilibratorPlatformEstimation2021">Beber et al. (<a href="#ref-beberEQuilibratorPlatformEstimation2021" role="doc-biblioref">2021</a>)</span> describes the software package and website eQuilibrator, which provides access to a large database of such measurements derived from <span class="citation" data-cites="goldbergThermodynamicsEnzymecatalyzedReactions2004">Goldberg, Tewari, and Bhat (<a href="#ref-goldbergThermodynamicsEnzymecatalyzedReactions2004" role="doc-biblioref">2004</a>)</span> among other sources.</p>
+</section>
+<section id="the-reactant-contribution-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-reactant-contribution-model">The reactant contribution model</h2>
+<p>Given a set of <span class="math inline">\(n\)</span> measurements <span class="math inline">\(y\in\mathbb{R}^n\)</span> of <span class="math inline">\(r\)</span> reactions’ standard condition Gibbs energy changes and a stoichiometric matrix <span class="math inline">\(S\in\mathbb{R}^{m\times r}\)</span> providing the stoichiometric coefficients of <span class="math inline">\(m\)</span> compounds in each measured reaction, formation energies can be estimated using the generative model in equation <span class="math inline">\(\eqref{eq-reactant-contribution}\)</span>, which is known as the ‘reactant contribution’ model:</p>
+<p><span class="math display">\[\begin{align}
+y_i &amp;\sim N(\hat{y}_i, \sigma) \label{eq-reactant-contribution} \\
+\hat{y}_i &amp;= \Delta_rG_{reaction(i)}  \nonumber \\
+\Delta_rG &amp;= S^\top\cdot \Delta_fG
+\end{align}\]</span></p>
+<p>In equation <span class="math inline">\(\eqref{eq-reactant-contribution}\)</span>, <span class="math inline">\(reaction\)</span> is a function mapping measurement indexes to columns of <span class="math inline">\(S\)</span>, so that <span class="math inline">\(reaction(i)\)</span> is the index of the column of S that was measured by measurement <span class="math inline">\(i\)</span> and <span class="math inline">\(\sigma\in\mathbb{R}\)</span> is a number representing the accuracy of the measurements.</p>
+<p><span class="citation" data-cites="noorConsistentEstimationGibbs2013">Noor et al. (<a href="#ref-noorConsistentEstimationGibbs2013" role="doc-biblioref">2013</a>)</span> describes how the reactant contribution model has been used to provide accurate estimates of biochemical formation energies. Unfortunately, the formation energies of many biochemical compounds cannot be estimated using the reactant contribution model because they do not participate in any measured reactions.</p>
+<section id="sec-reformulation-using-sufficient-statistics" class="level3">
+<h3 class="anchored" data-anchor-id="sec-reformulation-using-sufficient-statistics">Reformulation using sufficient statistics</h3>
+<p>By averaging measurements of the same reaction, we can create the mathematically equivalent form of the reactant contribution model shown in equation <span class="math inline">\(\eqref{eq-rc-sufficient}\)</span>. This model formulation takes advantage of the sufficient statistic that, for a sample of <span class="math inline">\(size\)</span> IID normal random variables <span class="math inline">\(X \sim N(\mu, \sigma)\)</span>, the sample mean <span class="math inline">\(\bar{X}\)</span> has distribution <span class="math inline">\(\bar{X}\sim N(\mu, \frac{\sigma}{\sqrt{size}})\)</span>. In equation <span class="math inline">\(\eqref{eq-rc-sufficient}\)</span>, <span class="math inline">\(\bar{y}_j\)</span> is the mean measurement of reaction{j} and <span class="math inline">\(size\)</span> is a function mapping reaction indexes to measurement counts, so that <span class="math inline">\(size(j)\)</span> is the number of measurements of reaction <span class="math inline">\(j\)</span>.</p>
+<p><span class="math display">\[\begin{equation}
+\bar{y}_j \sim N(\Delta_rG, \frac{\sigma}{size(j)}) \label{eq-rc-sufficient}
+\end{equation}\]</span></p>
+<p>This formulation is generally computationally preferable because the number of normal distribution densities to evaluate is the number of reactions <span class="math inline">\(r\)</span>, which is usually less than the number of measurements <span class="math inline">\(n\)</span>.</p>
+</section>
+</section>
+<section id="the-group-contribution-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-group-contribution-model">The group contribution model</h2>
+<p>The group contribution model addresses the reactant contribution model’s lack of coverage by allowing some unmeasured compounds’ formation energies to be estimated, provided these compounds are composed of measured chemical groups. The group contribution model adds to the generative model in equation <span class="math inline">\(\eqref{eq-rc-sufficient}\)</span> the group additivity assumption <span class="math inline">\(\eqref{eq-group-additivity}\)</span>, according to which a compound’s formation energy is the stoichiometry-weighted sum of the formation energies of its constituent groups, ‘group contribution’ model. In equation <span class="math inline">\(\eqref{eq-group-additivity}\)</span>, <span class="math inline">\(G\in\mathbb{R}^{m\times g}\)</span> is a group incidence matrix that maps combinations of <span class="math inline">\(m\)</span> compounds and <span class="math inline">\(g\)</span> groups to stoichiometric coefficients and <span class="math inline">\(\Delta_gG\)</span> is a vector of <span class="math inline">\(g\)</span> group formation energies.</p>
+<p><span class="math display">\[\begin{equation}
+\Delta_fG = G\cdot\Delta_gG \label{eq-group-additivity}
+\end{equation}\]</span></p>
+<p>Using this model’s estimates <span class="math inline">\(\hat{\Delta_gG}\)</span> for the parameters <span class="math inline">\(\Delta _gG\)</span>, the formation energy of an unmeasured compound composed of measured chemical groups can be estimated based on its group composition <span class="math inline">\(\vec{g}\)</span> using equation <span class="math inline">\(\eqref{eq-group-contribution-prediction}\)</span>.</p>
+<p><span class="math display">\[\begin{equation}
+\hat{\Delta_fG} = \vec{g}\cdot \hat{\Delta_gG}\label{eq-group-contribution-prediction}
+\end{equation}\]</span></p>
+</section>
+<section id="the-component-contribution-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-component-contribution-model">The component contribution model</h2>
+<p><span class="citation" data-cites="noorConsistentEstimationGibbs2013">Noor et al. (<a href="#ref-noorConsistentEstimationGibbs2013" role="doc-biblioref">2013</a>)</span> proposes to use formation energy estimates from the reactant contribution model where possible, falling back to estimates from the group contribution model for unmeasured compounds composed of measured groups. This method is known as the ‘component contribution’ model. While there have been more recent efforts to more accurately capture the effect of experimental conditions, as described in <span class="citation" data-cites="duEstimatingMetabolicEquilibrium2018">Du, Zielinski, and Palsson (<a href="#ref-duEstimatingMetabolicEquilibrium2018" role="doc-biblioref">2018</a>)</span> and <span class="citation" data-cites="beberEQuilibratorPlatformEstimation2021">Beber et al. (<a href="#ref-beberEQuilibratorPlatformEstimation2021" role="doc-biblioref">2021</a>)</span>, the component contribution model remains the state of the art for estimating standard condition biochemical formation energies.</p>
+</section>
+</section>
+<section id="sec-theoretical-problems-with-the-group-contribution-model" class="level1">
+<h1>Theoretical problem with the group contribution model</h1>
+<p>Suppose two compounds <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> have the same group composition <span class="math inline">\(\vec{g}_{ab}\)</span>. Then the group contribution estimate for compound <span class="math inline">\(a\)</span> is necessarily equal to the group contribution estimate for compound <span class="math inline">\(b\)</span>, i.e.</p>
+<p><span class="math display">\[\begin{equation}
+\hat{\Delta_fG}_a=\vec{g}_{ab}\cdot\hat{\Delta_gG}=\hat{\Delta_fG}_b \label{eq-group-contribution-problem}
+\end{equation}\]</span></p>
+<p>This implies that a reaction <span class="math inline">\(j\)</span> with stoichiometry <span class="math inline">\(\vec{s}_j\)</span> that converts <span class="math inline">\(a\)</span> into <span class="math inline">\(b\)</span> or vice versa will always have estimated standard condition Gibbs energy change <span class="math inline">\(\hat{\Delta_rG}_j\)</span> zero according to the group contribution model. According to equation <span class="math inline">\(\eqref{eq-thermodynamic-effect}\)</span>, the group contribution model will therefore imply that the direction of reaction <span class="math inline">\(j\)</span> depends only on the sign of the term <span class="math inline">\(1 - \exp(RT \cdot \frac{\vec{s}_j^\top\cdot\ln c}{RT})\)</span>, so that <span class="math inline">\(v &gt; 0\)</span> if and only if <span class="math inline">\(|a| &lt; |b|\)</span>.</p>
+<p><a href="#fig-network">Figure&nbsp;1</a> illustrates how this feature of the group contribution model can lead to contradictions with quantitative metabolomics and fluxomics data.</p>
+<div id="fig-network" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="./img/contradiction.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: Example of the group contribution model contradicting experimental data. By construction the metabolites <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> have the same group decomposition, so that according to the group contribution model <span class="math inline">\(v &gt; 0\)</span> if and only if <span class="math inline">\(|a| &lt; |b|\)</span>. However, <span class="math inline">\(v\)</span>, <span class="math inline">\(|a|\)</span> and <span class="math inline">\(|b|\)</span> have been measured experimentally, contradicting this.</figcaption>
+</figure>
+</div>
+<p>This feature of the group contribution model leads to a more practical modelling problem. If <span class="math inline">\(\Delta_gG\)</span> is estimated by maximum likelihood estimation, the covariance matrix of the estimator vector <span class="math inline">\(\hat{\Delta_fG}=G\hat{\Delta_gG}\)</span> is given by equation <span class="math inline">\(\eqref{eq-group-contribution-rank}\)</span>:</p>
+<p><span class="math display">\[\begin{equation}
+Cov(\hat{\Delta_fG}) = G \cdot Var(\hat{\Delta_gG}) \cdot G^\top \label{eq-group-contribution-rank}
+\end{equation}\]</span></p>
+<p>This covariance matrix has the same rank as <span class="math inline">\(G\)</span> since for <span class="math inline">\(A=B\cdot C\)</span>, <span class="math inline">\(rank(A)=min(rank(B), rank(C))\)</span>. Therefore, in the typical case where the number of groups <span class="math inline">\(g\)</span> is less than the number of compounds <span class="math inline">\(m\)</span>, the covariance matrix <span class="math inline">\(Cov(\hat{\Delta_fG})\)</span> is guaranteed to be rank-deficient. If <span class="math inline">\(Cov(\hat{\Delta_fG})\)</span> is used as the covariance matrix of a multivariate normal prior distribution in a Bayesian mechanistic metabolic model, the resulting posterior distribution will assign zero probability mass to some regions of <span class="math inline">\(\Delta_fG\)</span> space. If the true parameter allocation lies in such a region, the model will be irreparably biased and will also likely suffer from computational issues due to an unresolvable conflict between prior and likelihood.</p>
+</section>
+<section id="sec-methods" class="level1">
+<h1>Methods</h1>
+<p>We began by assessing to what extent the issue we identified with the group contribution method affects the state-of-the-art formation energy estimates provided by eQuilibrator. Our method for this assessment is described in <a href="#sec-how-big-is-the-problem">Section&nbsp;4.1</a>.</p>
+<p>Next, as described in <a href="#sec-improved-group-contribution-model">Section&nbsp;4.2</a>, we devised a minimal improvement to the group contribution method that avoids the rank deficiency issue with the minimum possible change.</p>
+<p>Section <a href="#sec-hierarchical-component-contribution-model">Section&nbsp;4.3</a> describes an alternative statistical model of the eQuilibrator data that addresses the rank deficiency issue more comprehensively.</p>
+<p>Finally, <a href="#sec-case-study">Section&nbsp;4.6</a> describes how we compared our new models with the state of the art.</p>
+<section id="sec-how-big-is-the-problem" class="level2">
+<h2 class="anchored" data-anchor-id="sec-how-big-is-the-problem">How big is the problem?</h2>
+<p>Since there are multiple possible decompositions of compounds into chemical groups, it is not possible to say in general which reactions are affected by the issue we highlight with the group contribution model. However to get a general idea we used the group decomposition matrix from the <code>equilibrator-api</code> package . We then used the <code>e_coli_core</code> model from <span class="citation" data-cites="orthReconstructionUseMicrobial2010">Orth, Fleming, and Palsson (<a href="#ref-orthReconstructionUseMicrobial2010" role="doc-biblioref">2010</a>)</span>, as exposed by the Python package <code>COBRApy</code> <span class="citation" data-cites="ebrahimCOBRApyCOnstraintsBasedReconstruction2013">Ebrahim et al. (<a href="#ref-ebrahimCOBRApyCOnstraintsBasedReconstruction2013" role="doc-biblioref">2013</a>)</span>, to identify important reactions that conserve groups according to this matrix.</p>
+<p>We found 82 group-conserving reaction in the training dataset, 11 of which are also in the <code>e_coli_core</code> model. These reactions are shown below in <a href="#tbl-bad-reactions">Table&nbsp;1</a>.</p>
+<p>See appendix [SAY WHERE] for code used to carry out this analysis.</p>
+<div id="tbl-bad-reactions" class="anchored">
+<table class="table">
+<caption>Table&nbsp;1: Reactions in the <code>e_coli_core</code> model that conserve chemical groups according to the <code>equilibrator-api</code> group decomposition matrix, implying that their standard Gibbs energy of reaction is exactly zero according to the group contribution model.</caption>
+<colgroup>
+<col style="width: 92%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>description</th>
+<th>EC number</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>alpha-D-Glucose 6-phosphate(aq) = beta-D-Glucose 6-phosphate(aq)</td>
+<td>2.7.4.3</td>
+</tr>
+<tr class="even">
+<td>3-phosphonooxypyruvate(aq) + L-glutamate(aq) = 2-oxoglutarate(aq) + O-phospho-L-serine(aq)</td>
+<td>2.7.1.40</td>
+</tr>
+<tr class="odd">
+<td>UDPglucose(aq) = UDPgalactose(aq)</td>
+<td>1.6.1.1</td>
+</tr>
+<tr class="even">
+<td>2’-deoxyinosine(aq) + adenine(aq) = 2’-deoxyadenosine(aq) + hypoxanthine(aq)</td>
+<td>5.3.1.9</td>
+</tr>
+<tr class="odd">
+<td>3-phosphonooxypyruvate(aq) + L-glutamate(aq) = 2-oxoglutarate(aq) + O-phospho-L-serine(aq)</td>
+<td>5.3.1.6</td>
+</tr>
+<tr class="even">
+<td>UDPglucose(aq) = UDPgalactose(aq)</td>
+<td>4.2.1.2</td>
+</tr>
+<tr class="odd">
+<td>N-succinyl-2-L-amino-6-oxoheptanedioate(aq) + L-glutamate(aq) = N-succinyl-L-2,6-diaminoheptanedioate(aq) + 2-oxoglutarate(aq)</td>
+<td>1.1.1.42</td>
+</tr>
+<tr class="even">
+<td>3-phosphonooxypyruvate(aq) + L-glutamate(aq) = 2-oxoglutarate(aq) + O-phospho-L-serine(aq)</td>
+<td>4.1.3.1</td>
+</tr>
+<tr class="odd">
+<td>L-aspartate(aq) + 2-oxoglutarate(aq) = oxaloacetate(aq) + L-glutamate(aq)</td>
+<td>4.2.1.3</td>
+</tr>
+<tr class="even">
+<td>L-alanine(aq) + hydroxypyruvate(aq) = L-serine(aq) + pyruvate(aq)</td>
+<td>4.1.2.13</td>
+</tr>
+<tr class="odd">
+<td>ATP(aq) + GDP(aq) = ADP(aq) + GTP(aq)</td>
+<td>4.2.1.11</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="sec-improved-group-contribution-model" class="level2">
+<h2 class="anchored" data-anchor-id="sec-improved-group-contribution-model">Improved group contribution model</h2>
+<p>As a smallest possible adjustment to the group contribution model, we propose to add a vector of independent random variables <span class="math inline">\(\vec{\eta}\in\mathbb{R}^m\)</span> to the group contribution estimate in order to quantify the error due to compound formation energies differing from sums of group formation energies. The improved generative model is shown below in equation <span class="math inline">\(\eqref{eq-group-contribution-improved}\)</span>.</p>
+<p><span class="math display">\[\begin{align}
+\bar{y}_j &amp;\sim N(\Delta_rG_j, \frac{\sigma}{size(j)}) \label{eq-group-contribution-improved} \\
+\Delta_rG &amp;= S^\top\cdot \Delta_fG \nonumber \\
+\Delta_fG &amp;= G\cdot\Delta_gG + \vec{\eta} \nonumber
+\end{align}\]</span></p>
+<p>For a minimal change to the group contribution model we propose assuming <span class="math inline">\(\vec{\eta}_i \sim N(0, \tau)\)</span> for all compounds <span class="math inline">\(i\)</span>, where <span class="math inline">\(\tau\in\mathbb{R}^+\)</span> is a known real number.</p>
+<p>This improved group contribution model leads has the same maximum likelhood estimator <span class="math inline">\(\hat{\Delta_fG}\)</span> as the current group contribution method. However in the improved model the covariance matrix <span class="math inline">\(Cov(\hat{\Delta_fG})\)</span> is found by equation <span class="math inline">\(\eqref{eq-improved-cov}\)</span>.</p>
+<p><span class="math display">\[\begin{align}
+  Cov(\hat{\Delta_fG}) &amp;= G \cdot Var(\hat{\Delta_gG}) \cdot G^\top
+\label{eq-improved-cov} \\
+&amp;+ diag_m(\tau) \nonumber
+\end{align}\]</span></p>
+<p>In this model <span class="math inline">\(Cov(\hat{\Delta_fG})\)</span> is guaranteed to be full rank, as <span class="math inline">\(diag_m(\tau)\)</span> is full rank. The model, and prior distributions based on it, will therefore avoid the computational and theoretical issues and discussed in <a href="#sec-theoretical-problems-with-the-group-contribution-model">Section&nbsp;3</a>.</p>
+<p>For the best possible results we suggest choosing <span class="math inline">\(\tau\)</span> based on the available information about the likely general accuracy of the group additivity assumption. In practice the choice of <span class="math inline">\(\tau\)</span> is not very important when the main goal is simply to obtain a full-rank covariance matrix for formation energy estimates, as any positive value will achieve this. On the other hand, if the main goal requires an accurate value for <span class="math inline">\(\tau\)</span> we recommend using estimates derived from the more detailed statistical model described below in <a href="#sec-hierarchical-component-contribution-model">Section&nbsp;4.3</a>.</p>
+</section>
+<section id="sec-hierarchical-component-contribution-model" class="level2">
+<h2 class="anchored" data-anchor-id="sec-hierarchical-component-contribution-model">Hierarchical component contribution model</h2>
+<p>As an alternative to the component contribution model, we propose a hierarchical model which includes both compound-level and group-level effects. This model is realised by augmenting the generative model in equation <span class="math inline">\(\eqref{eq-group-contribution-improved}\)</span> with the prior distributions in equation <span class="math inline">\(\eqref{eq-component-contribution-improved}\)</span>:</p>
+<p><span class="math display">\[\begin{align}
+\vec{\eta} &amp;\sim N(0, \tau) \label{eq-component-contribution-improved} \\
+\Delta_gG &amp;\sim N(0, 5000) \nonumber \\
+\tau &amp;\sim HN(0, 3) \nonumber \\
+\sigma &amp;\sim HN(0, 3) \nonumber \\
+\end{align}\]</span></p>
+<p>In equation <span class="math inline">\(\eqref{eq-component-contribution-improved}\)</span> <span class="math inline">\(HN\)</span> represents the non-negative half-normal distribution, i.e.&nbsp;the distribution with normal distribution densities for non-negative numbers and zero density for negative numbers.</p>
+<p>The prior distribution for the group formation energy vector <span class="math inline">\(\Delta_gG\)</span> is uninformative, whereas those for <span class="math inline">\(\tau\)</span>, <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\eta\)</span> are informative. In particular, the prior distribution for <span class="math inline">\(\eta\)</span> is hierarchical as it involves the random variable <span class="math inline">\(\tau\)</span>. This allows us to estimate the general accuracy of the group additivity assumption from the data: larger values of <span class="math inline">\(\tau\)</span> will allow weaker coupling between compound and group formation energies.</p>
+<p>This model structure is appropriate given the available information. In general there is very little prior information available about group formation energies, but there is information about measurement accuracy and the likely accuracy of the group additivity assumption.</p>
+<section id="sec-qr-reparameterisation" class="level3">
+<h3 class="anchored" data-anchor-id="sec-qr-reparameterisation">QR reparameterisation</h3>
+<p>Since our model’s joint posterior distribution cannot be calculated analytically and has many parameters, we decided to use Markov Chain Monte Carlo to perform posterior inference. This proved difficult under a naive parameterisation due to the collinearity induced by multiplying the parameter vector <span class="math inline">\(\Delta_gG\)</span> by the group decomposition matrix and then the stoichiometric matrix as shown in equation <span class="math inline">\(\eqref{eq-group-contribution-improved}\)</span>. Due to these transformations, the information in the measurements relates to the underlying group formation energy parameters through linear projections determined by the matrix <span class="math inline">\(S^\top G\)</span>. This structure induces a problematic posterior geometry that is difficult for a gradient-based MCMC sampler to traverse.</p>
+<p>In order to address this issue we reparameterised our models using the thin QR decomposition. Specifically, we found matrices an orthonormal matrix <span class="math inline">\(Q\in\mathbb{R}^{r\times g}\)</span> and an upper triangular matrix <span class="math inline">\(R\in\mathbb{R}^{g\times g}\)</span> such that <span class="math inline">\(Q\cdot R = S^\top\cdot G\)</span>. We could then express our model in terms of auxiliary parameters <span class="math inline">\(\vec{q}\)</span> as shown in <span class="math inline">\(\eqref{eq-qr}\)</span>.</p>
+<p><span class="math display">\[\begin{align}
+Q^\star &amp;= Q \cdot \sqrt{r - 1} \label{eq-qr} \\
+R^\star &amp;= \frac{R}{\sqrt{r - 1}} \nonumber \\
+\Delta_rG &amp;= Q^\star \cdot \vec{q} + S^\top \cdot \vec{\eta} \nonumber
+\end{align}\]</span></p>
+<p>In this parameterisation the formation energy parameters <span class="math inline">\(\Delta_fG\)</span> and <span class="math inline">\(\Delta_gG\)</span> can be recovered as shown in equation <span class="math inline">\(\eqref{eq-qr-recovery}\)</span>, in which the superscript <span class="math inline">\(^+\)</span> represents the Moore-Penrose pseudo-inverse:</p>
+<p><span class="math display">\[\begin{align}
+\Delta_gG &amp;= (R^\star)^+ \cdot \vec{q} \label{eq-qr-recovery}\\
+\Delta_fG &amp;= G \cdot \Delta_gG + \eta \nonumber
+\end{align}\]</span></p>
+<p>This reparameterisation closely follows the advice on the relevant page of the Stan user’s guide, which can be found <a href="https://github.com/stan-dev/docs/blob/6b68270529344a30821ea20ae4ccebd4c1c60362/src/stan-users-guide/regression.Rmd#L149">here</a> in the exact form in which it was accessed.</p>
+</section>
+</section>
+<section id="sec-unmodelled-compounds" class="level2">
+<h2 class="anchored" data-anchor-id="sec-unmodelled-compounds">Estimating formation energies for unmeasured or unmodelled compounds</h2>
+<p>Using our approach it is possible to estimate the formation energy of any compound, regardless of whether the compound was measured or explicitly included in our model. The procedure for doing this is as follows.</p>
+<ol type="1">
+<li>If the compound was included in the model, generate estimates using the marginal posterior samples for that compound as described above in equation <span class="math inline">\(\eqref{eq-qr-recovery}\)</span>.</li>
+<li>If the compound was not included in the model, but is composed of included groups, then generate draws for the variable <span class="math inline">\(\eta_{new}\in\mathbb{R}\)</span> based on the marginal posterior samples for <span class="math inline">\(\tau\)</span>, using the assumption <span class="math inline">\(\eta_{new}\sim N(0, \tau)\)</span>. Now recover <span class="math inline">\(\Delta_fG_{new}\)</span> as in <span class="math inline">\(\eqref{eq-qr-recovery}\)</span>.</li>
+<li>If the compound was not included in the model and is partly or wholly composed of <span class="math inline">\(g_{new}\)</span> un-modelled groups, generate draws for the missing group parameters <span class="math inline">\(\vec{q}_{new}\in\mathbb{R}^{g_{new}}\)</span> based on the prior distribution for <span class="math inline">\(\vec{q}\)</span>. Next find <span class="math inline">\(\Delta_gG_{new}\)</span> using equation <span class="math inline">\(\eqref{eq-qr-recovery}\)</span>, then generate <span class="math inline">\(\eta_{new}\)</span> and recover <span class="math inline">\(\Delta_fG_{new}\)</span> using the same method as for case 2.</li>
+</ol>
+<p>While it is possible, using this procedure, to generate formation energy estimates for any compounds consistently with the information and assumptions in our model, the accuracy of the resulting estimates is limited by the information about the unmeasured or unmodelled compounds in the training data. In particular, formation energy estimates for compounds that include unmeasured chemical groups will typically be very wide, as our model assumes that there is little information available about the parameters <span class="math inline">\(\vec{q}_{new}\)</span>.</p>
+</section>
+<section id="using-our-results-for-downstream-modelling" class="level2">
+<h2 class="anchored" data-anchor-id="using-our-results-for-downstream-modelling">Using our results for downstream modelling</h2>
+<p>In order to use our model results for downstream modelling, for example as a prior distribution for thermodynamic parameters in a Bayesian kinetic model, we suggest fitting a multivariate normal distribution to our model’s posterior <span class="math inline">\(\Delta_fG\)</span> parameter samples. We have done this for our results and provide the resulting tables in [TODO: SAY WHERE]. The code that produced these tables is available at [TODO: SAY WHERE].</p>
+</section>
+<section id="sec-case-study" class="level2">
+<h2 class="anchored" data-anchor-id="sec-case-study">Model evaluation</h2>
+<p>In order to compare our new model with the state of the art, we fit it to the component contribution dataset. We compared our model’s estimates with those of the component contribution model when fit to the same dataset. Next, we constructed a test dataset by removing some reactions, then re-fit both our model and the component contribution model to this dataset and compared the resulting estimates.</p>
+<p>Specifically, we excluded from the test dataset all measurements of reactions involving the compounds Acetyl CoA, PEP and G6P. There were 33 such reactions and 370 measurements.</p>
+</section>
+<section id="software" class="level2">
+<h2 class="anchored" data-anchor-id="software">Software</h2>
+<p>We implemented our project using Python and structured it using the package <code>bibat</code> [TODO: INSERT CITATION].</p>
+<p>We used the package <code>equilibrator_api</code> to fetch the component contribution dataset and <code>cobrapy</code> to identify metabolites and reactions in the <code>e_coli_core</code> model. We carried out data cleaning, structuring and validation using <code>pydantic</code>, <code>pandera</code>, <code>numpy</code> and <code>pandas</code>.</p>
+<p>Our statistical models were written in the probabilistic programming language Stan <span class="citation" data-cites="carpenterStanProbabilisticProgramming2017">Carpenter et al. (<a href="#ref-carpenterStanProbabilisticProgramming2017" role="doc-biblioref">2017</a>)</span>. Sampling was performed using <code>cmdstan</code> via the <code>cmdstanpy</code> interface. We used <code>arviz</code> to diagnose, structure and store our samples and for visualisation.</p>
+<p>All the code used to implement our analysis, and instructions for reproducing it, can be found at <a href="https://github.com/biosustain/dgfreg" class="uri">https://github.com/biosustain/dgfreg</a>.</p>
+</section>
+</section>
+<section id="results" class="level1">
+<h1>Results</h1>
+<section id="mcmc-diagnostics" class="level2">
+<h2 class="anchored" data-anchor-id="mcmc-diagnostics">MCMC diagnostics</h2>
+<p>For each of our models, we assessed convergence by running 4 MCMC chains and monitoring the improved <span class="math inline">\(\hat{R}\)</span> statistic proposed in <span class="citation" data-cites="vehtariRankNormalizationFoldingLocalization2021">Vehtari et al. (<a href="#ref-vehtariRankNormalizationFoldingLocalization2021" role="doc-biblioref">2021</a>)</span>, verifying that this number was close to 1 for all variables. We also measured the effective sample size per iteration, verifying that this was not low enough to indicate improper sampling. We also checked that there were no post-warmup divergent transitions.</p>
+</section>
+<section id="assessment-of-model-specification" class="level2">
+<h2 class="anchored" data-anchor-id="assessment-of-model-specification">Assessment of model specification</h2>
+<p>To assess model specification we performed a posterior predictive check as shown in figure <a href="#fig-marginal-ppc">Figure&nbsp;2</a>. Our model’s 1%-99% marginal posterior predictive distributions contained the measured value for approximately 98% of measurements, with no particular patterns in the deviations, indicating a reasonably good. Figure <a href="#fig-ppc-kde">Figure&nbsp;3</a> shows that our model was able to achieve a good fit despite a somewhat unbalanced distribution of measurements.</p>
+<div id="fig-marginal-ppc" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="plots/marginal_ppc.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;2: Posterior predictive check</figcaption>
+</figure>
+</div>
+<div id="fig-ppc-kde" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="plots/ppc_kde.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;3: Overall posterior predictive check</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-posterior-distributions-of-interesting-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="sec-posterior-distributions-of-interesting-parameters">Posterior distributions of interesting parameters</h2>
+<p><a href="#fig-posteriors">Figure&nbsp;4</a> shows the posterior distributions in our model for the parameters <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\tau_{compound}\)</span> and <span class="math inline">\(\tau_{group}\)</span>, alongside these parameters’ prior distributions. The plots show that the model was able to reconcile the data with our prior information, though it made <span class="math inline">\(\tau_{group}\)</span> somewhat higher than we expected.</p>
+<div id="fig-posteriors" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="plots/posteriors.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;4: Posterior distributions of univariate model parameters</figcaption>
+</figure>
+</div>
+</section>
+<section id="comparison-with-component-contribution" class="level2">
+<h2 class="anchored" data-anchor-id="comparison-with-component-contribution">Comparison with component contribution</h2>
+<p>Overall our model produced similar formation energy estimates with somewhat larger marginal uncertainties compared with the component contribution model. This can be seen from figure <a href="#fig-estimate-comparison">Figure&nbsp;5</a>, which shows the marginal 1%-99% posterior intervals for our model alongside the 1%-99% quantiles of the corresponding component contribution uncertainty intervals. Note that these plots are normalised based on the central component contribution estimate. The fact that the red horizontal lines center on the black vertical line indicates that our model’s central estimates tend to be very close to those of the component contribution model.</p>
+<div id="fig-estimate-comparison" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="plots/marginal_dgf_comparison.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;5: Comparison of component contribution estimates with our model</figcaption>
+</figure>
+</div>
+<p><a href="#fig-marginal-hist-widths">Figure&nbsp;6</a> shows histograms of the 1%-99% marginal posterior widths for our model and the component contribution model. It shows more explicitly than <a href="#fig-estimate-comparison">Figure&nbsp;5</a> that the new model tends to produce more uncertain marginal formation energy estimates than the component contribution model.</p>
+<div id="fig-marginal-hist-widths" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="plots/marginal_width_hists.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;6: Comparison of component contribution uncertainty interval widths with our model</figcaption>
+</figure>
+</div>
+<p>To compare model fit between our model and the component contribution model we found, for each measurement in the full dataset, the residual for the component contribution <span class="math inline">\(\Delta_rG\)</span> as well as the residual for our model’s marginal posterior predictive mean. A histogram of the results is shown in <a href="#fig-residuals-full-dataset">Figure&nbsp;7</a>, as well as the overall root mean squared error for each model. These results show that the two models achieved about the same level of fit to the data, with our model achieving slightly smaller errors on average.</p>
+<div id="fig-residuals-full-dataset" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="plots/posterior_predictive_comparison.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;7: Comparison of residuals</figcaption>
+</figure>
+</div>
+</section>
+<section id="out-of-sample-predictions" class="level2">
+<h2 class="anchored" data-anchor-id="out-of-sample-predictions">Out of sample predictions</h2>
+<p>The RMSE on test measurements for component contribution was 43.28 for component contribution compared with 16.70 for our model. However, this figure is somewhat misleading as it is dominated by a single outlier measurement of the phosphoenolpyruvate mutase reaction. There is little information about this reaction in the test dataset, whose marginal posterior predictive interval in our model spans a range of about 4500 kJ/mol. The component contribution model predicts a value of 771 kJ/mol, whereas our model’s posterior predictive mean was 235 kJ/mol and the measured value was -28 kJ/mol. Excluding this measurement the RMSE values are 12.01 for component contribution and 9.57 for our model.</p>
+<p>Close inspection of the residuals reveals that this difference relects a consistent improvement in our model’s predictions compared with component contribution. <a href="#fig-residual-hist-test-dataset">Figure&nbsp;8</a> shows the distribution of residual differences for test measurements between the two models. For most test measurements our model made better predictions.</p>
+<div id="fig-residual-hist-test-dataset" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="plots/out_of_sample_residual_hist.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;8: Distribution of out of sample absolute residual differences</figcaption>
+</figure>
+</div>
+<p><a href="#fig-test-reaction-residuals">Figure&nbsp;9</a> shows, for each reaction except phosphoenolpyruvate mutase, our model’s 1%-99% residual interval with respect to the observed average measurement for that reaction alongside the posterior predictive mean residual and component contribution residual. This shows the typical size of the difference in out of sample prediction accuracy between the two models. It is clear from this plot that our model’s posterior predictive means tended to make better out of sample predictions than component contribution.</p>
+<div id="fig-test-reaction-residuals" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="plots/out_of_sample_reaction_residuals.svg" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;9: Comparison of residuals</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<section id="comparison-with-state-of-the-art" class="level2">
+<h2 class="anchored" data-anchor-id="comparison-with-state-of-the-art">Comparison with state of the art</h2>
+<p>While our results show that our model improves on the state of the art in out-of-sample predictive accuracy, the most important improvement is to produce a plausible multivariate normal distribution with a full-rank covariance matrix for biochemical formation energies. We expect that this will allow for better prior distributions in future Bayesian thermokinetic models.</p>
+</section>
+<section id="limitations" class="level2">
+<h2 class="anchored" data-anchor-id="limitations">Limitations</h2>
+<p>Our model does not take into account adjustments for experimental conditions, instead naiively modelling condition-adjusted measurements reported by eQuilibrator. This is important as the adjustment for conditions is non-trivial and different plausible modelling assumptions can lead to large changes in adjusted measurements. See [CITATION HERE] for more discussion of this issue.</p>
+<p>We also used the same group decomposition matrix as eQuilibrator. An alternative group decomposition matrix might yield more accurate results. [CITE example paper]</p>
+<p>Another modelling approach that we did not explore attempts to infer formation energies from chemical structures. [CITATION].</p>
+</section>
+<section id="extensions-and-future-work" class="level2">
+<h2 class="anchored" data-anchor-id="extensions-and-future-work">Extensions and future work</h2>
+<p>We plan to augment our model with an application that can generate posterior summaries for unmodelled compounds as described in section <a href="#sec-unmodelled-compounds">Section&nbsp;4.4</a>.</p>
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-beberEQuilibratorPlatformEstimation2021" class="csl-entry" role="listitem">
+Beber, Moritz E., Mattia G. Gollub, Dana Mozaffari, Kevin M. Shebek, and Elad Noor. 2021. <span>“<span class="nocase">eQuilibrator</span> 3.0 – a Platform for the Estimation of Thermodynamic Constants.”</span> <em>arXiv:2103.00621 [q-Bio]</em>, February. <a href="http://arxiv.org/abs/2103.00621">http://arxiv.org/abs/2103.00621</a>.
+</div>
+<div id="ref-carpenterStanProbabilisticProgramming2017" class="csl-entry" role="listitem">
+Carpenter, Bob, Andrew Gelman, Matthew D. Hoffman, Daniel Lee, Ben Goodrich, Michael Betancourt, Marcus Brubaker, Jiqiang Guo, Peter Li, and Allen Riddell. 2017. <span>“Stan: <span>A Probabilistic Programming Language</span>.”</span> <em>Journal of Statistical Software</em> 76 (1): 1–32. <a href="https://doi.org/10.18637/jss.v076.i01">https://doi.org/10.18637/jss.v076.i01</a>.
+</div>
+<div id="ref-duEstimatingMetabolicEquilibrium2018" class="csl-entry" role="listitem">
+Du, Bin, Daniel C. Zielinski, and Bernhard O. Palsson. 2018. <span>“Estimating <span>Metabolic Equilibrium Constants</span>: <span>Progress</span> and <span>Future Challenges</span>.”</span> <em>Trends in Biochemical Sciences</em> 43 (12): 960–69. <a href="https://doi.org/10.1016/j.tibs.2018.09.009">https://doi.org/10.1016/j.tibs.2018.09.009</a>.
+</div>
+<div id="ref-ebrahimCOBRApyCOnstraintsBasedReconstruction2013" class="csl-entry" role="listitem">
+Ebrahim, Ali, Joshua A. Lerman, Bernhard O. Palsson, and Daniel R. Hyduke. 2013. <span>“<span>COBRApy</span>: <span>COnstraints-Based Reconstruction</span> and <span>Analysis</span> for <span>Python</span>.”</span> <em>BMC Systems Biology</em> 7 (1): 74. <a href="https://doi.org/10.1186/1752-0509-7-74">https://doi.org/10.1186/1752-0509-7-74</a>.
+</div>
+<div id="ref-goldbergThermodynamicsEnzymecatalyzedReactions2004" class="csl-entry" role="listitem">
+Goldberg, Robert N., Yadu B. Tewari, and Talapady N. Bhat. 2004. <span>“Thermodynamics of Enzyme-Catalyzed Reactionsa Database for Quantitative Biochemistry.”</span> <em>Bioinformatics</em> 20 (16): 2874–77. <a href="https://doi.org/10.1093/bioinformatics/bth314">https://doi.org/10.1093/bioinformatics/bth314</a>.
+</div>
+<div id="ref-noorConsistentEstimationGibbs2013" class="csl-entry" role="listitem">
+Noor, Elad, Hulda S. Haraldsdóttir, Ron Milo, and Ronan M. T. Fleming. 2013. <span>“Consistent <span>Estimation</span> of <span>Gibbs Energy Using Component Contributions</span>.”</span> Edited by Daniel A. Beard. <em>PLoS Computational Biology</em> 9 (7): e1003098. <a href="https://doi.org/10.1371/journal.pcbi.1003098">https://doi.org/10.1371/journal.pcbi.1003098</a>.
+</div>
+<div id="ref-orthReconstructionUseMicrobial2010" class="csl-entry" role="listitem">
+Orth, Jeffrey D., R. M. T. Fleming, and Bernhard Ø. Palsson. 2010. <span>“Reconstruction and <span>Use</span> of <span>Microbial Metabolic Networks</span>: The <span>Core Escherichia</span> Coli <span>Metabolic Model</span> as an <span>Educational Guide</span>.”</span> <em>EcoSal Plus</em> 4 (1): 10.1128/ecosalplus.10.2.1. <a href="https://doi.org/10.1128/ecosalplus.10.2.1">https://doi.org/10.1128/ecosalplus.10.2.1</a>.
+</div>
+<div id="ref-vehtariRankNormalizationFoldingLocalization2021" class="csl-entry" role="listitem">
+Vehtari, Aki, Andrew Gelman, Daniel Simpson, Bob Carpenter, and Paul-Christian Bürkner. 2021. <span>“Rank-<span>Normalization</span>, <span>Folding</span>, and <span>Localization</span>: <span>An Improved R^</span> for <span>Assessing Convergence</span> of <span>MCMC</span> (with <span>Discussion</span>).”</span> <em>Bayesian Analysis</em> 16 (2): 667–718. <a href="https://doi.org/10.1214/20-BA1221">https://doi.org/10.1214/20-BA1221</a>.
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

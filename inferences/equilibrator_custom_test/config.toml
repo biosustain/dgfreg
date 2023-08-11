@@ -1,0 +1,29 @@
+name = "equilibrator_custom_test"
+stan_file = "new.stan"
+prepared_data_dir = "equilibrator"
+stan_input_function = "get_stan_input_custom_holdback"
+modes = ["posterior"]
+
+[dims]
+dgfG = ["group_id"]
+dgfC = ["compound_id"]
+dgr = ["reaction_id"]
+qC = ["compound_id"]
+qG = ["group_id"]
+
+[stanc_options]
+warn-pedantic = true
+
+[sample_kwargs]
+save_warmup = true
+show_progress = true
+iter_warmup = 1000
+max_treedepth = 12
+iter_sampling = 1000
+
+[mode_options.kfold]
+n_folds = 5
+chains = 1
+iter_warmup = 500
+iter_sampling = 500
+
