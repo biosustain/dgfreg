@@ -18,7 +18,7 @@ endif
 env: $(ENV_MARKER)
 
 $(ACTIVATE_VENV):
-	python -m venv .venv --prompt=dgfreg
+	python3 -m venv .venv --prompt=dgfreg
 
 $(QUARTO_EXTENSIONS_FOLDER):
 	cd docs && quarto add quarto-ext/include-code-files && cd -
@@ -30,17 +30,17 @@ docs: $(ENV_MARKER) $(QUARTO_EXTENSIONS_FOLDER)
 
 $(ENV_MARKER): $(ACTIVATE_VENV) $(CMDSTAN)
 	. $(ACTIVATE_VENV) && (\
-	  python -m pip install --upgrade pip; \
-		python -m pip install -e .; \
+	  python3 -m pip install --upgrade pip; \
+		python3 -m pip install -e .; \
 	  install_cmdstan $(INSTALL_CMDSTAN_FLAGS); \
 		touch $@ ; \
 	)
 
 analysis: $(ENV_MARKER)
 	. $(ACTIVATE_VENV) && (\
-	  python -m pytest || exit 1; \
-	  python $(SRC)/prepare_data.py || exit 1; \
-	  python $(SRC)/sample.py || exit 1; \
+	  python3 -m pytest || exit 1; \
+	  python3 $(SRC)/prepare_data.py || exit 1; \
+	  python3 $(SRC)/sample.py || exit 1; \
 	  jupyter execute $(SRC)/investigate.ipynb || exit 1; \
 	)
 
