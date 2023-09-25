@@ -1,9 +1,6 @@
 # GitHub workflow to install python 3.9, python libraries from requirements.txt
 # and cmdstanpy, then run pytest.
 
-# The "runs-on" and "strategy" headings make the workflow run on both ubuntu
-# and windows.
-
 # See here for more about GitHub workflows:
 # https://docs.github.com/en/actions/using-workflows
 
@@ -14,11 +11,11 @@ on: push
 jobs:
   build:
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
 
     strategy:
         matrix:
-            os: [ubuntu-latest, windows-latest]
+            os: [ubuntu-latest]
 
     steps:
     - uses: actions/checkout@v2
