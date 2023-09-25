@@ -25,7 +25,8 @@ dependencies = [
     "pyspark",
     "scipy",
     "scikit-learn",
-    "toml",    "pytest",
+    "toml",
+    "pytest",
     "black",]
 
 [tool.setuptools]

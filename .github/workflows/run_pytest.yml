@@ -29,4 +29,4 @@ jobs:
     - name: Set up environment
       run: make env
     - name: Run pytest
-      run: .venv/bin/activate && python -m pytest
+      run: source .venv/bin/activate && python -m pytest
