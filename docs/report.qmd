@@ -511,7 +511,7 @@ each model. These results show that the two models achieved about the same
 level of fit to the data, with our model achieving slightly smaller errors on
 average.
 
-![Comparison of residuals](plots/posterior_predictive_comparison.png){#fig-residuals-full-dataset}
+![Comparison of residuals](plots/in_sample_rmse_comparison.svg){#fig-residuals-full-dataset}
 
 ## Out of sample predictions
 
