@@ -16,7 +16,7 @@ dependencies = [
     "cmdstanpy",
     "jupyter",
     "numpy",
-    "pandas",
+    "pandas>=2.0.0",
     "cobra@git+https://github.com/opencobra/cobrapy.git@devel",
     "component_contribution@git+https://gitlab.com/equilibrator/component-contribution.git@c9daebf4bcf3c6fc84ccc83d1a6aa62df9d61248",
     "equilibrator_api",
