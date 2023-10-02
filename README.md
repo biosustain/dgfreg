@@ -5,6 +5,9 @@ Regression models estimating standard condition Gibbs free energy changes of bio
 
 # How to run the analysis
 
+Install python >= 3.9. If this is not your default python3 then you should manually create the 
+virtual environment with e.g. `python3.10 -m venv .venv`
+
 To run the analysis, run the command `make analysis` from the project root. This
 will install a fresh virtual environment if one doesn't exist already, activate
 it and install python dependencies and cmdstan, then run the analysis with the
