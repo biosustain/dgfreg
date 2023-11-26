@@ -41,45 +41,49 @@ format:
 
 ## The thermodynamic effect on the rate of a biochemical reaction {#sec-thermodynamic-effect}
 
-The rate of an enzyme-catalysed reaction is closely related to the reaction's
-thermodynamic properties, particularly the standard condition Gibbs free energy
-of formation, or "formation energy" of each consumed and produced compound.
-Under standard conditions the overall rate $v$ of a reaction involving
-$n\in\mathbb{N}$ species depends on formation energies $\Delta_f
-G\in\mathbb{R}^n$, as well as stoichiometries $\vec{s}\in\mathbb{R}^n$,
-concentrations $c\in\mathbb{R}_+^n$, temperature $T\in \mathbb{R}_+$, gas
-constant $R\approx0.008314$ and non-thermodynamic effects $\psi \in
-\mathbb{R}_+$ according to equation \eqref{eq-thermodynamic-effect}:
-
+Reaction thermodynamics play an essential role in the accurate modelling of metabolic processes and are used to determine the the direction in which a chemical reaction proceeds.
+The Gibb's energy of a reaction (or Gibb's **free** energy of reaction) represents the amount of usable energy released by a reaction <!-- TODO confirm --> and can be calculated as a function of the Gibb's energy of formation of its substrates. 
+Under standard conditions the overall rate $v$ of a reaction is given by:
+<!--JJ: I would maybe go with the TMFA eqns here instead. Otherwise it looks like a linear relationship between dgr and flux-->
 \begin{align}
 v &= reversibility \cdot \psi \label{eq-thermodynamic-effect} \\
 reversibility &= 1 - \exp(\Delta_rG + RT \cdot \frac{\vec{s}^\top\cdot\ln c}{RT}) \nonumber \\
 \Delta_rG &= \vec{s}^\top\cdot \Delta_fG \nonumber 
 \end{align}
-
-From equation \eqref{eq-thermodynamic-effect} it can be seen that the
+where, $n\in\mathbb{N}$ species depends on formation energies $\Delta_f
+G\in\mathbb{R}^n$, as well as stoichiometries $\vec{s}\in\mathbb{R}^n$,
+concentrations $c\in\mathbb{R}_+^n$, temperature $T\in \mathbb{R}_+$, gas
+constant $R\approx0.008314$ and non-thermodynamic effects $\psi \in
+\mathbb{R}_+$.
+From equation \eqref{eq-thermodynamic-effect}, it can be seen that the
 thermodynamic term $reversibility$ determines the direction of $v$ as well as
 affecting its magnitude. Accurate quantitative modelling of biochemical fluxes
 therefore requires careful estimation of formation energies.
 
+
 ## Standard condition $\Delta_rG$ measurements
 
+<!--JJ - I think we could maybe expand a little here on the history of the estimation process and how its been applied-->
 Since not all biochemically important compounds' formation energies have been
-directly measured, in order to estimate formation energies it is necessary to
-rely on measurements of $\Delta_rG$. @beberEQuilibratorPlatformEstimation2021
-describes the software package and website eQuilibrator, which provides access
-to a large database of such measurements derived from
-@goldbergThermodynamicsEnzymecatalyzedReactions2004 among other sources.
+directly measured, for comprehensive modelling, it is required to estimate the thermodynamic properties of many reactions and metabolites. 
+<!--JJ: Some numbers here about ratios of available compounds/reactions in models would be nice-->
+These estimation methods rely on experimental measurements of $\Delta_rG$.
+@beberEQuilibratorPlatformEstimation2021 describes the software package and website eQuilibrator, which provides access
+to a large database of estimates and measurements derived from @goldbergThermodynamicsEnzymecatalyzedReactions2004 among other sources.
+<!--JJ: Could talk a bit more about data sources here-->
 
 ## The reactant contribution model
 
+<!--JJ: The reactant contribution model hasn't been introduced yet-->
 Given a set of $n$ measurements $y\in\mathbb{R}^n$ of $r$ reactions' standard
 condition Gibbs energy changes and a stoichiometric matrix
 $S\in\mathbb{R}^{m\times r}$ providing the stoichiometric coefficients of $m$
 compounds in each measured reaction, formation energies can be estimated using
 the generative model in equation \eqref{eq-reactant-contribution}, which is
 known as the 'reactant contribution' model:
+<!--JJ: Is it a generative model if we don't have priors over dgf? Maybe just worth introducting it as a standard linear regression? Check the original definition?-->
 
+<!--JJ: This notation could be a bit more elegant-->
 \begin{align}
 y_i &\sim N(\hat{y}_i, \sigma) \label{eq-reactant-contribution} \\
 \hat{y}_i &= \Delta_rG_{reaction(i)}  \nonumber \\
