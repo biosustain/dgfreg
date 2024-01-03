@@ -83,7 +83,7 @@ the generative model in equation \eqref{eq-reactant-contribution}, which is
 known as the 'reactant contribution' model:
 <!--JJ: Is it a generative model if we don't have priors over dgf? Maybe just worth introducting it as a standard linear regression? Check the original definition?-->
 
-<!--JJ: This notation could be a bit more elegant-->
+<!--JJ: This notation could be a bit more succinct-->
 \begin{align}
 y_i &\sim N(\hat{y}_i, \sigma) \label{eq-reactant-contribution} \\
 \hat{y}_i &= \Delta_rG_{reaction(i)}  \nonumber \\
@@ -91,7 +91,7 @@ y_i &\sim N(\hat{y}_i, \sigma) \label{eq-reactant-contribution} \\
 \end{align}
 
 In equation \eqref{eq-reactant-contribution}, $reaction$ is a function mapping
-measurement indexes to columns of $S$, so that $reaction(i)$ is the index of
+measurement indices to columns of $S$, so that $reaction(i)$ is the index of
 the column of S that was measured by measurement $i$ and $\sigma\in\mathbb{R}$
 is a number representing the accuracy of the measurements.
 
@@ -102,6 +102,8 @@ cannot be estimated using the reactant contribution model because they do not
 participate in any measured reactions. 
 
 ### Reformulation using sufficient statistics {#sec-reformulation-using-sufficient-statistics}
+
+<!--Do we need this section at all?-->
 
 By averaging measurements of the same reaction, we can create the
 mathematically equivalent form of the reactant contribution model shown in
@@ -122,6 +124,8 @@ distribution densities to evaluate is the number of reactions $r$, which is
 usually less than the number of measurements $n$.
 
 ## The group contribution model
+
+<!--Maybe this whole section could be condensed a bit?-->
 
 The group contribution model addresses the reactant contribution model's lack
 of coverage by allowing some unmeasured compounds' formation energies to be
