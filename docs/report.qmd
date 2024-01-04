@@ -134,11 +134,12 @@ The group contribution model adds to the generative model in equation
 \eqref{eq-rc-sufficient} the group additivity assumption
 \eqref{eq-group-additivity}, according to which a compound's formation energy
 is the stoichiometry-weighted sum of the formation energies of its constituent
-groups, 'group contribution' model. In equation \eqref{eq-group-additivity},
+groups, i.e. the 'group contribution' model. In equation \eqref{eq-group-additivity},
 $G\in\mathbb{R}^{m\times g}$ is a group incidence matrix that maps combinations
 of $m$ compounds and $g$ groups to stoichiometric coefficients and $\Delta_gG$
 is a vector of $g$ group formation energies.
 
+<!--I think we could make a distinction here between the dgr estimation and the dgf estimation. The more emphasis that we put on there being two estimates, the clearer it is later that we have two separate issues with them. I think we can also emphasise here that the dgr estimates also have the epsilon E[eps]=0, which is still important for variance estimates. -->
 \begin{equation}
 \Delta_fG = G\cdot\Delta_gG \label{eq-group-additivity}
 \end{equation}
@@ -151,6 +152,7 @@ groups can be estimated based on its group composition $\vec{g}$ using equation
 \begin{equation}
 \hat{\Delta_fG} = \vec{g}\cdot \hat{\Delta_gG}\label{eq-group-contribution-prediction}
 \end{equation}
+
 
 ## The component contribution model
 
@@ -169,6 +171,8 @@ formation energies.
 Suppose two compounds $a$ and $b$ have the same group composition
 $\vec{g}_{ab}$. Then the group contribution estimate for compound $a$ is
 necessarily equal to the group contribution estimate for compound $b$, i.e.
+
+<!--Same as above, I think we should start with the dgr estimate here (that is the true model that is fit, after all) and then move on to dgf. Also I think it should be clear that we're not stating this as fact, but that we're either quoting the authors or working within the limitations of the model formulation-->
 
 \begin{equation}
 \hat{\Delta_fG}_a=\vec{g}_{ab}\cdot\hat{\Delta_gG}=\hat{\Delta_fG}_b \label{eq-group-contribution-problem}
