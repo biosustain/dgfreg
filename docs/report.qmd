@@ -218,6 +218,8 @@ region, the model will be irreparably biased and will also likely suffer from
 computational issues due to an unresolvable conflict between prior and
 likelihood.
 
+<!--Yes!-->
+
 # Methods {#sec-methods}
 
 We began by assessing to what extent the issue we identified with the group
@@ -252,6 +254,7 @@ also in the `e_coli_core` model. These reactions are shown below in
 @tbl-bad-reactions. 
 
 See appendix [SAY WHERE] for code used to carry out this analysis.
+<!--I reckon we can just put the code up on github. As long as it's well organised people will be able to find it-->
 
 | description                                                                                                                    | EC number|
 |--------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -272,6 +275,7 @@ to the `equilibrator-api` group decomposition matrix, implying that their
 standard Gibbs energy of reaction is exactly zero according to the group
 contribution model. {#tbl-bad-reactions}
 
+<!--This would be the spot for the diagram of dgf that can't match-->
 ## Improved group contribution model {#sec-improved-group-contribution-model}
 
 As a smallest possible adjustment to the group contribution model, we propose
