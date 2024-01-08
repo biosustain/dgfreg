@@ -278,6 +278,8 @@ contribution model. {#tbl-bad-reactions}
 <!--This would be the spot for the diagram of dgf that can't match-->
 ## Improved group contribution model {#sec-improved-group-contribution-model}
 
+<!--We need a new structure here to make both suggestions. Not totally sure how it should work-->
+
 As a smallest possible adjustment to the group contribution model, we propose
 to add a vector of independent random variables $\vec{\eta}\in\mathbb{R}^m$ to
 the group contribution estimate in order to quantify the error due to compound
@@ -300,6 +302,8 @@ estimator $\hat{\Delta_fG}$ as the current group contribution method. However
 in the improved model the covariance matrix $Cov(\hat{\Delta_fG})$ is found by
 equation \eqref{eq-improved-cov}.
 
+<!--Is this really true? What if we have an outlier compound, for example? eta then absorbs this variance, making dGg different. I think I could come up with a counterexample-->
+
 \begin{align}
   Cov(\hat{\Delta_fG}) &= G \cdot Var(\hat{\Delta_gG}) \cdot G^\top 
 \label{eq-improved-cov} \\
@@ -310,6 +314,7 @@ In this model $Cov(\hat{\Delta_fG})$ is guaranteed to be full rank, as
 $diag_m(\tau)$ is full rank. The model, and prior distributions based on it,
 will therefore avoid the computational and theoretical issues and discussed in
 @sec-theoretical-problems-with-the-group-contribution-model.
+<!--yes!-->
 
 For the best possible results we suggest choosing $\tau$ based on the available
 information about the likely general accuracy of the group additivity
@@ -321,6 +326,8 @@ estimates derived from the more detailed statistical model described below in
 @sec-hierarchical-component-contribution-model.
 
 ## Hierarchical component contribution model {#sec-hierarchical-component-contribution-model}
+
+<!--JJ: read through again to understand the difference between these two models (I'm text only right now)-->
 
 As an alternative to the component contribution model, we propose a
 hierarchical model which includes both compound-level and group-level effects.
@@ -366,6 +373,8 @@ energy parameters through linear projections determined by the matrix $S^\top
 G$. This structure induces a problematic posterior geometry that is difficult
 for a gradient-based MCMC sampler to traverse.
 
+<!--I don't quite understand why from this-->
+
 In order to address this issue we reparameterised our models using the thin QR
 decomposition. Specifically, we found matrices an orthonormal matrix
 $Q\in\mathbb{R}^{r\times g}$ and an upper triangular matrix
@@ -392,6 +401,8 @@ This reparameterisation closely follows the advice on the relevant page of the
 Stan user's guide, which can be found
 [here](https://github.com/stan-dev/docs/blob/6b68270529344a30821ea20ae4ccebd4c1c60362/src/stan-users-guide/regression.Rmd#L149)
 in the exact form in which it was accessed.
+
+<!--Cool trick!-->
 
 ## Estimating formation energies for unmeasured or unmodelled compounds {#sec-unmodelled-compounds}
 
