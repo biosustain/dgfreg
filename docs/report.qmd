@@ -3,20 +3,19 @@ title: "Hierarchical Bayesian regression modelling predicts biochemical rection 
 toc: true
 resource_path: ["../"]
 abstract: >
-  The thermodynamic effect on a biochemical reaction depends principally on the
-  standard-condition Gibbs energy changes of the compounds that the reaction
-  consumes and produces. The state of the art method for estimating these
-  parameters involves a statistical model called group contribution. We highlight
-  a problem with the group contribution model that limits its usefulness in
-  downstream modelling applications: the group contribution model typically
-  produces a rank-deficient uncertainty covariance matrix. We present a new model
-  that avoids this issue, generates more accurate estimates than the current
-  state of the art and has unlimited reaction coverage. Our model includes
-  parameters for both chemical groups and compounds, using a hierarchical
-  component to balance information pertaining to these two levels, and addresses
-  the issue of stoichiometric collinearity using QR decomposition. We provide a
-  Gaussian approximation to our model's posterior distribution that can be used
-  for downstream modelling. Our results can be replicated straightforwardly by
+  The thermodynamic effect on a biochemical reaction depends principally
+  on the standard-condition formation energies of the compounds that the
+  reaction consumes and produces. The state of the art method for estimating
+  these parameters involves a statistical model called group contribution.
+  We highlight a problem with group contribution: it typically produces a
+  rank-deficient uncertainty covariance matrix. We present a new model that
+  avoids this issue, generates more accurate estimates than the current state
+  of the art and has unlimited reaction coverage. Our model includes parameters
+  for both chemical groups and compounds, using a hierarchical component to
+  balance information pertaining to these two levels, and addresses the issue
+  of stoichiometric collinearity using QR decomposition. We provide a Gaussian
+  approximation to our model's posterior distribution that can be used for
+  downstream modelling. Our results can be replicated by
   following the instructions at <https://github.com/biosustain/dgfreg>.
 author: 
   - name: "Teddy Groves"
@@ -31,6 +30,7 @@ bibliography: bibliography.bib
 format:
   html: 
     include-in-header: mathjax.html
+    embed-resources: true
   docx: default
   pdf: default
 ---
