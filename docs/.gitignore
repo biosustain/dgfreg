@@ -1,2 +1,12 @@
 /.quarto/
 *$*
+*.aux
+*.log
+# Assumes we're only using qmd
+*.tex 
+*.toc
+# Generated pdf files
+mediabag 
+# Quarto related. Not quite sure
+_extensions
+

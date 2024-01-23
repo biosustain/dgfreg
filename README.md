@@ -21,6 +21,11 @@ following commands:
 
 First make sure you have installed [quarto](https://https://quarto.org/).
 
+Make sure to install librsvg2-bin for svg to pdf conversion
+```
+sudo apt install librsvg2-bin
+```
+
 Now run this command from the project root:
 
 ```
