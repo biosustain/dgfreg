@@ -9,4 +9,7 @@
 mediabag 
 # Quarto related. Not quite sure
 _extensions
-
+# Report outputs
+*html
+*docx
+*pdf
