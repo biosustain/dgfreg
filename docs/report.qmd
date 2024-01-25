@@ -425,64 +425,49 @@ distribution for $\vec{q}$. Next find $\Delta_gG_{new}$ using equation
 \eqref{eq-qr-recovery}, then generate $\eta_{new}$ and recover
 $\Delta_fG_{new}$ using the same method as for case 2.
 
-While it is possible, using this procedure, to generate formation energy
-estimates for any compounds consistently with the information and assumptions
-in our model, the accuracy of the resulting estimates is limited by the
-information about the unmeasured or unmodelled compounds in the training data.
-In particular, formation energy estimates for compounds that include unmeasured
-chemical groups will typically be very wide, as our model assumes that there is
-little information available about the parameters $\vec{q}_{new}$.
+While it is possible, using this procedure, to generate formation energy estimates for any compounds consistently with the information and assumptions in our model, the accuracy of the resulting estimates is limited by the information about the unmeasured or unmodelled compounds in the training data.
+In particular, formation energy estimates for compounds that include unmeasured chemical groups will typically be very wide, as our model assumes that there is little information available about the parameters $\vec{q}_{new}$.
+We quantify the uncertainty of these different kinds of predictions in @sec-case-study.
+
+<!--Should we do this for a big database of compounds? It would be interesting to especially compare for compounds with unmeasured groups-->
 
 ## Using our results for downstream modelling
 
-In order to use our model results for downstream modelling, for example as a
-prior distribution for thermodynamic parameters in a Bayesian kinetic model, we
-suggest fitting a multivariate normal distribution to our model's posterior
-$\Delta_fG$ parameter samples. We have done this for our results and provide
-the resulting tables in [TODO: SAY WHERE]. The code that produced these tables is
-available at [TODO: SAY WHERE].
+In order to use our model results for downstream modelling, for example as a prior distribution for thermodynamic parameters in a Bayesian kinetic model, we suggest fitting a multivariate normal distribution to our model's posterior $\Delta_fG$ parameter samples.
+The fit of our model is provided the resulting tables in [TODO: SAY WHERE].
+The code that produced these tables is available at [TODO: SAY WHERE].
 
+<!--Can we talk about how well they fit? Some measure of how well our samples actually fit this normal distribution?-->
 ## Model evaluation {#sec-case-study}
 
-In order to compare our new model with the state of the art, we fit it to the
-component contribution dataset. We compared our model's estimates with those of
-the component contribution model when fit to the same dataset. Next, we
-constructed a test dataset by removing some reactions, then re-fit both our
-model and the component contribution model to this dataset and compared the
-resulting estimates.
+In order to compare our new model with the state of the art, we compared our estimates to those of Equilibrator when fit on the entire component contribution dataset, and under cross-validation. 
 
-Specifically, we excluded from the test dataset all measurements of reactions
-involving the compounds Acetyl CoA, PEP and G6P. There were 33 such reactions
-and 370 measurements.
+<!--TODO: Figure out what was happening here-->
+We excluded from the test dataset all measurements of reactions involving the compounds Acetyl CoA, PEP and G6P.
+There were 33 such reactions and 370 measurements.
 
 ## Software
 
-We implemented our project using Python and structured it using the package
-`bibat` [TODO: INSERT CITATION]. 
+We implemented our project using Python and structured it using the package `bibat` [TODO: INSERT CITATION].
 
-We used the package `equilibrator_api` to fetch the component contribution
-dataset and `cobrapy` to identify metabolites and reactions in the
-`e_coli_core` model. We carried out data cleaning, structuring and validation
-using `pydantic`, `pandera`, `numpy` and `pandas`.
+We used the package `equilibrator_api` to fetch the component contribution dataset and `cobrapy` to identify metabolites and reactions in the `e_coli_core` model.
+We carried out data cleaning, structuring and validation using `pydantic`, `pandera`, `numpy` and `pandas`.
 
-Our statistical models were written in the probabilistic programming language
-Stan @carpenterStanProbabilisticProgramming2017. Sampling was performed using
-`cmdstan` via the `cmdstanpy` interface. We used `arviz` to diagnose, structure
-and store our samples and for visualisation.
+Our statistical models were written in the probabilistic programming language Stan @carpenterStanProbabilisticProgramming2017.
+Sampling was performed using `cmdstan` via the `cmdstanpy` interface.
+We used `arviz` to diagnose, structure and store our samples and for visualisation.
 
-All the code used to implement our analysis, and instructions for reproducing
-it, can be found at <https://github.com/biosustain/dgfreg>.
+All the code used to implement our analysis, and instructions for reproducing it, can be found at <https://github.com/biosustain/dgfreg>.
+
+<!--Love all the credit given here!-->
 
 # Results
 
 ## MCMC diagnostics
 
-For each of our models, we assessed convergence by running 4 MCMC chains and
-monitoring the improved $\hat{R}$ statistic proposed in
-@vehtariRankNormalizationFoldingLocalization2021, verifying that this number
-was close to 1 for all variables. We also measured the effective sample size
-per iteration, verifying that this was not low enough to indicate improper
-sampling. We also checked that there were no post-warmup divergent transitions.
+For each of our models, we assessed convergence by running 4 MCMC chains and monitoring the improved $\hat{R}$ statistic proposed in @vehtariRankNormalizationFoldingLocalization2021, verifying that this number was close to 1 for all variables.
+We also measured the effective sample size per iteration, verifying that this was not low enough to indicate improper sampling.
+We also checked that there were no post-warmup divergent transitions.
 
 ## Assessment of model specification
 
