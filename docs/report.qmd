@@ -95,11 +95,15 @@ measurement indices to columns of $S$, so that $reaction(i)$ is the index of
 the column of S that was measured by measurement $i$ and $\sigma\in\mathbb{R}$
 is a number representing the accuracy of the measurements.
 
+<!--Comment here that this allows for new *reactions* to be predicted when they share compounds. Can be referenced again for dgg-->
+
 @noorConsistentEstimationGibbs2013 describes how the reactant contribution
 model has been used to provide accurate estimates of biochemical formation
 energies. Unfortunately, the formation energies of many biochemical compounds
 cannot be estimated using the reactant contribution model because they do not
 participate in any measured reactions. 
+
+<!--Can be better explained with reference to the above comment-->
 
 ### Reformulation using sufficient statistics {#sec-reformulation-using-sufficient-statistics}
 
@@ -126,6 +130,7 @@ usually less than the number of measurements $n$.
 ## The group contribution model
 
 <!--Maybe this whole section could be condensed a bit?-->
+<!--Explaining the group additivity assumption would help with the breakdown of the errors later-->
 
 The group contribution model addresses the reactant contribution model's lack
 of coverage by allowing some unmeasured compounds' formation energies to be
@@ -196,6 +201,9 @@ that according to the group contribution model $v > 0$ if and only if $|a| <
 |b|$. However, $v$, $|a|$ and $|b|$ have been measured experimentally,
 contradicting this.](./img/contradiction.svg){#fig-network}
 
+<!--We don't need this diagram-->
+<!--Better explained as a lack of model expressiveness-->
+
 This feature of the group contribution model leads to a more practical
 modelling problem. If $\Delta_gG$ is estimated by maximum likelihood
 estimation, the covariance matrix of the estimator vector
@@ -218,7 +226,14 @@ region, the model will be irreparably biased and will also likely suffer from
 computational issues due to an unresolvable conflict between prior and
 likelihood.
 
-<!--Yes!-->
+<!--How does the above interact with the two compounds same groups thing? That's also a reduction in rank, no?-->
+
+<!--This causing a violation in thermodynamics-->
+
+  <!--- Problems with EQB covariance estimates  -->
+
+  <!--Diagram of pairwise predictions for dgf and dgr-->
+
 
 # Methods {#sec-methods}
 
@@ -249,12 +264,12 @@ package . We then used the `e_coli_core` model from
 @ebrahimCOBRApyCOnstraintsBasedReconstruction2013, to identify important
 reactions that conserve groups according to this matrix. 
 
+ <!--We could also look at the rank of the various matrices here?-->
+<!--Were any of these actually measured?-->
+
 We found 82 group-conserving reaction in the training dataset, 11 of which are
 also in the `e_coli_core` model. These reactions are shown below in
 @tbl-bad-reactions. 
-
-See appendix [SAY WHERE] for code used to carry out this analysis.
-<!--I reckon we can just put the code up on github. As long as it's well organised people will be able to find it-->
 
 | description                                                                                                                    | EC number|
 |--------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -297,10 +312,8 @@ For a minimal change to the group contribution model we propose assuming
 $\vec{\eta}_i \sim N(0, \tau)$ for all compounds $i$, where
 $\tau\in\mathbb{R}^+$ is a known real number.
 
-This improved group contribution model leads has the same maximum likelhood
-estimator $\hat{\Delta_fG}$ as the current group contribution method. However
-in the improved model the covariance matrix $Cov(\hat{\Delta_fG})$ is found by
-equation \eqref{eq-improved-cov}.
+This improved group contribution model has the same maximum likelhood estimator $\hat{\Delta_fG}$ as the current group contribution method. <!--I don't think this is true, e.g. if there is one outlier compound. Allowing it to vary will allow the coeffs for the others to be more normal.-->
+However in the improved model the covariance matrix $Cov(\hat{\Delta_fG})$ is found by equation \eqref{eq-improved-cov}.
 
 <!--Is this really true? What if we have an outlier compound, for example? eta then absorbs this variance, making dGg different. I think I could come up with a counterexample-->
 
@@ -347,6 +360,8 @@ non-negative half-normal distribution, i.e. the distribution with normal
 distribution densities for non-negative numbers and zero density for negative
 numbers.
 
+<!--Nitpicking, but wouldn't it have to be normalised as well?-->
+
 The prior distribution for the group formation energy vector $\Delta_gG$ is
 uninformative, whereas those for $\tau$, $\sigma$ and $\eta$ are informative.
 In particular, the prior distribution for $\eta$ is hierarchical as it involves
@@ -373,6 +388,7 @@ energy parameters through linear projections determined by the matrix $S^\top
 G$. This structure induces a problematic posterior geometry that is difficult
 for a gradient-based MCMC sampler to traverse.
 
+<!--Specifically, this is because some compounds are only ever relative, right?-->
 <!--I don't quite understand why from this-->
 
 In order to address this issue we reparameterised our models using the thin QR
@@ -403,6 +419,7 @@ Stan user's guide, which can be found
 in the exact form in which it was accessed.
 
 <!--Cool trick!-->
+<!--This also addresses the equilibrator problem?-->
 
 ## Estimating formation energies for unmeasured or unmodelled compounds {#sec-unmodelled-compounds}
 
@@ -445,6 +462,7 @@ In order to compare our new model with the state of the art, we compared our est
 <!--TODO: Figure out what was happening here-->
 We excluded from the test dataset all measurements of reactions involving the compounds Acetyl CoA, PEP and G6P.
 There were 33 such reactions and 370 measurements.
+ <!--Definitely needs to be fleshed out-->
 
 ## Software
 
@@ -460,83 +478,71 @@ We used `arviz` to diagnose, structure and store our samples and for visualisati
 All the code used to implement our analysis, and instructions for reproducing it, can be found at <https://github.com/biosustain/dgfreg>.
 
 <!--Love all the credit given here!-->
+<!--Can this be in the appendix?-->
 
 # Results
 
 ## MCMC diagnostics
 
 For each of our models, we assessed convergence by running 4 MCMC chains and monitoring the improved $\hat{R}$ statistic proposed in @vehtariRankNormalizationFoldingLocalization2021, verifying that this number was close to 1 for all variables.
-We also measured the effective sample size per iteration, verifying that this was not low enough to indicate improper sampling.
-We also checked that there were no post-warmup divergent transitions.
+We also measured the effective sample size per iteration, ensuring that this was not low enough to indicate improper sampling.
+Additionally, we checked that there were no post-warmup divergent transitions.
+<!--These should probably be reported-->
 
 ## Assessment of model specification
 
-To assess model specification we performed a posterior predictive check as
-shown in figure @fig-marginal-ppc. Our model's 1%-99% marginal posterior
-predictive distributions contained the measured value for approximately 98% of
-measurements, with no particular patterns in the deviations, indicating a
-reasonably good. Figure @fig-ppc-kde shows that our model was able to achieve a
-good fit despite a somewhat unbalanced distribution of measurements.
+To assess model specification we performed a posterior predictive check as shown in figure @fig-marginal-ppc. <!--This is on the fitted model, right?-->
+Our model's 1%-99% marginal posterior predictive distributions contained the measured value for approximately 98% of measurements, with no particular patterns in the deviations, indicating a reasonable model specification.<!-- Isn't exactly the number that we would expect in this window?-->
+Figure @fig-ppc-kde shows that our model was able to achieve a good fit despite a somewhat unbalanced distribution of measurements.<!-- What is meant by unbalanced measurements here?-->
+
+<!--Could these metrics be applied to the base model? It might not perform as well-->
 
 ![Posterior predictive check](plots/marginal_ppc.svg){#fig-marginal-ppc}
 
 ![Overall posterior predictive check](plots/ppc_kde.svg){#fig-ppc-kde}
+<!--This needs better axis labels. y / yrep is a bit unintuitive (I first read it as division). This is a kernel density plot, right?-->
 
 ## Posterior distributions of interesting parameters {#sec-posterior-distributions-of-interesting-parameters}
 
-@fig-posteriors shows the posterior distributions in our model for the
-parameters $\mu$, $\tau_{compound}$ and $\tau_{group}$, alongside these
-parameters' prior distributions. The plots show that the model was able to
-reconcile the data with our prior information, though it made $\tau_{group}$
-somewhat higher than we expected.
+@fig-posteriors shows the posterior distributions in our model for the parameters $\mu$, $\tau_{compound}$ and $\tau_{group}$, alongside these parameters' prior distributions.
+The plots show that the model was able to reconcile the data with our prior information, though it made $\tau_{group}$ somewhat higher than we expected.
+<!--Remove the value judgement here?-->
+<!--Are tau_compound and tau_group still the going terms?-->
 
+<!--TODO: This fig needs to be updated with info from both-->
 ![Posterior distributions of univariate model parameters](plots/posteriors.svg){#fig-posteriors}
 
 ## Comparison with component contribution
 
-Overall our model produced similar formation energy estimates with somewhat
-larger marginal uncertainties compared with the component contribution model.
-This can be seen from figure @fig-estimate-comparison, which shows the marginal
-1%-99% posterior intervals for our model alongside the 1%-99% quantiles of the
-corresponding component contribution uncertainty intervals. Note that these
-plots are normalised based on the central component contribution estimate. The
-fact that the red horizontal lines center on the black vertical line indicates
-that our model's central estimates tend to be very close to those of the
-component contribution model.
+Overall our model produced similar formation energy estimates with somewhat larger marginal uncertainties compared with the component contribution model.
+<!--TODO: Compare this with the *correct* formulation of the model (i.e. with the eps included)-->
+This can be seen from figure @fig-estimate-comparison, which shows the marginal 1%-99% posterior intervals for our model alongside the 1%-99% quantiles of the corresponding component contribution uncertainty intervals.
+Note that these plots are normalised based on the central component contribution estimate.
+The fact that the red horizontal lines center on the black vertical line indicates that our model's central estimates tend to be very close to those of the component contribution model.
 
 ![Comparison of component contribution estimates with our model](plots/marginal_dgf_comparison.svg){#fig-estimate-comparison}
 
-@fig-marginal-hist-widths shows histograms of the 1%-99% marginal posterior
-widths for our model and the component contribution model. It shows more
-explicitly than @fig-estimate-comparison that the new model tends to produce
-more uncertain marginal formation energy estimates than the component
-contribution model.
+@fig-marginal-hist-widths shows histograms of the 1%-99% marginal posterior widths for our model and the component contribution model.
+It shows more explicitly than @fig-estimate-comparison that the new model tends to produce more uncertain marginal formation energy estimates than the component contribution model.
 
+<!--TODO: Dashed lines for means and thinner-->
 ![Comparison of component contribution uncertainty interval widths with our model](plots/marginal_width_hists.svg){#fig-marginal-hist-widths}
 
-To compare model fit between our model and the component contribution model we
-found, for each measurement in the full dataset, the residual for the component
-contribution $\Delta_rG$ as well as the residual for our model's marginal
-posterior predictive mean. A histogram of the results is shown in
-@fig-residuals-full-dataset, as well as the overall root mean squared error for
-each model. These results show that the two models achieved about the same
-level of fit to the data, with our model achieving slightly smaller errors on
-average.
-
+To compare model fit between our model and the component contribution model we found, for each measurement in the full dataset, the residual for the component contribution $\Delta_rG$ as well as the residual for our model's marginal posterior predictive mean.
+A histogram of the results is shown in @fig-residuals-full-dataset, as well as the overall root mean squared error for each model.
+These results show that the two models achieved about the same level of fit to the data, with our model achieving slightly smaller errors on average.
+<!--Mention RMSE values in text here?-->
+<!--TODO: Better caption-->
 ![Comparison of residuals](plots/in_sample_rmse_comparison.svg){#fig-residuals-full-dataset}
 
 ## Out of sample predictions
-
-The RMSE on test measurements for component contribution was 43.28 for
-component contribution compared with 16.70 for our model. However, this figure
-is somewhat misleading as it is dominated by a single outlier measurement of
-the phosphoenolpyruvate mutase reaction. There is little information about this
-reaction in the test dataset, whose marginal posterior predictive interval in
-our model spans a range of about 4500 kJ/mol. The component contribution model
-predicts a value of 771 kJ/mol, whereas our model's posterior predictive mean
-was 235 kJ/mol and the measured value was -28 kJ/mol. Excluding this
-measurement the RMSE values are 12.01 for component contribution and 9.57 for
-our model.
+<!--This needs an intro sentence-->
+The RMSE on test measurements for component contribution was 43.28 for component contribution compared with 16.70 for our model.
+However, this figure is somewhat misleading as it is dominated by a single outlier measurement of the phosphoenolpyruvate mutase reaction.
+There is little information about this reaction in the test dataset, whose marginal posterior predictive interval in our model spans a range of about 4500 kJ/mol.
+The component contribution model predicts a value of 771 kJ/mol, whereas our model's posterior predictive mean was 235 kJ/mol and the measured value was -28 kJ/mol.
+Excluding this measurement the RMSE values are 12.01 for component contribution and 9.57 for our model.
+<!--This suggests that a single *metabolite* is actually the cause. Would be interesting to look at that distribution-->
 
 Close inspection of the residuals reveals that this difference relects a
 consistent improvement in our model's predictions compared with component
@@ -545,6 +551,7 @@ residual differences for test measurements between the two models. For most
 test measurements our model made better predictions. 
 
 ![Distribution of out of sample absolute residual differences](plots/out_of_sample_residual_hist.svg){#fig-residual-hist-test-dataset}
+<!--Nice diagram!-->
 
 @fig-test-reaction-residuals shows, for each reaction except
 phosphoenolpyruvate mutase, our model's 1%-99% residual interval with respect
@@ -556,36 +563,31 @@ means tended to make better out of sample predictions than component
 contribution.
 
 ![Comparison of residuals](plots/out_of_sample_reaction_residuals.svg){#fig-test-reaction-residuals}
+<!--I think this plot is a little confusing-->
+<!--We can look at marginal variance for their predictions as well here. We also want to show that they are underestimating their variance-->
+<!--TODO: Add discussion of pairwise variance estimates here-->
+<!--TODO: We need to visualise multivariate stuff here-->
 
 # Discussion
 
 ## Comparison with state of the art
 
-While our results show that our model improves on the state of the art in
-out-of-sample predictive accuracy, the most important improvement is to produce
-a plausible multivariate normal distribution with a full-rank covariance matrix
-for biochemical formation energies. We expect that this will allow for better
-prior distributions in future Bayesian thermokinetic models.
+While our results show that our model improves on the state of the art in out-of-sample predictive accuracy, the most important improvement is to produce a plausible multivariate normal distribution with a full-rank covariance matrix for biochemical formation energies.
+We expect that this will allow for better prior distributions in future Bayesian thermokinetic models.
 
 ## Limitations
 
-Our model does not take into account adjustments for experimental conditions,
-instead naiively modelling condition-adjusted measurements reported by
-eQuilibrator. This is important as the adjustment for conditions is non-trivial
-and different plausible modelling assumptions can lead to large changes in
-adjusted measurements. See [CITATION HERE] for more discussion of this issue.
+Our model does not take into account adjustments for experimental conditions, instead naiively modelling condition-adjusted measurements reported by eQuilibrator.
+This is important as the adjustment for conditions is non-trivial and different plausible modelling assumptions can lead to large changes in adjusted measurements.
+See [CITATION HERE] for more discussion of this issue.
 
-We also used the same group decomposition matrix as eQuilibrator. An
-alternative group decomposition matrix might yield more accurate results. [CITE
-example paper]
+We also used the same group decomposition matrix as eQuilibrator.
+An alternative group decomposition matrix might yield more accurate results.
+[CITE example paper]
 
-Another modelling approach that we did not explore attempts to infer formation
-energies from chemical structures. [CITATION].
+Another modelling approach that we did not explore attempts to infer formation energies from chemical structures.
+[CITATION].
 
 ## Extensions and future work
 
-We plan to augment our model with an application that can generate posterior
-summaries for unmodelled compounds as described in section
-@sec-unmodelled-compounds.
-
-
+We plan to augment our model with an application that can generate posterior summaries for unmodelled compounds as described in section @sec-unmodelled-compounds.
