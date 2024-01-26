@@ -35,6 +35,16 @@ format:
   pdf: default
 ---
 
+<!--Macros-->
+::: {.hidden}
+$$
+\newcommand{\dgr}{\Delta_rG}
+\newcommand{\dgf}{\Delta_fG}
+\newcommand{\dgg}{\Delta_gG}
+$$
+:::
+<!--End Macros-->
+
 # Abstract
 
 # Background {#sec-background}
@@ -42,32 +52,21 @@ format:
 ## The thermodynamic effect on the rate of a biochemical reaction {#sec-thermodynamic-effect}
 
 Reaction thermodynamics play an essential role in the accurate modelling of metabolic processes and are used to determine the the direction in which a chemical reaction proceeds.
-The Gibb's energy of a reaction (or Gibb's **free** energy of reaction) represents the amount of usable energy released by a reaction <!-- TODO confirm --> and can be calculated as a function of the Gibb's energy of formation of its substrates. 
-Under standard conditions the overall rate $v$ of a reaction is given by:
-<!--JJ: I would maybe go with the TMFA eqns here instead. Otherwise it looks like a linear relationship between dgr and flux-->
+The Gibb's energy of a reaction (also referred to as the Gibb's *free* energy of reaction) represents the amount of usable energy released by a reaction.
+As it is a state function, the Gibbs energy of a reaction $\dgr$ is solely a function of the Gibb's energy of formation $\dgf$ of its substrates. This can be conveniently represented in linear algebraic form as:
 \begin{align}
-v &= reversibility \cdot \psi \label{eq-thermodynamic-effect} \\
-reversibility &= 1 - \exp(\Delta_rG + RT \cdot \frac{\vec{s}^\top\cdot\ln c}{RT}) \nonumber \\
-\Delta_rG &= \vec{s}^\top\cdot \Delta_fG \nonumber 
+\dgr &= \vec{s}^\top\cdot \dgf \\
+
 \end{align}
-where, $n\in\mathbb{N}$ species depends on formation energies $\Delta_f
-G\in\mathbb{R}^n$, as well as stoichiometries $\vec{s}\in\mathbb{R}^n$,
-concentrations $c\in\mathbb{R}_+^n$, temperature $T\in \mathbb{R}_+$, gas
-constant $R\approx0.008314$ and non-thermodynamic effects $\psi \in
-\mathbb{R}_+$.
-From equation \eqref{eq-thermodynamic-effect}, it can be seen that the
-thermodynamic term $reversibility$ determines the direction of $v$ as well as
-affecting its magnitude. Accurate quantitative modelling of biochemical fluxes
-therefore requires careful estimation of formation energies.
+where $\vec{s}\in\mathbb{R}^n$ represents the stoichiometries of the substrates of the reactions.
 
-
-## Standard condition $\Delta_rG$ measurements
+## Standard condition $\dgr$ measurements
 
 <!--JJ - I think we could maybe expand a little here on the history of the estimation process and how its been applied-->
 Since not all biochemically important compounds' formation energies have been
 directly measured, for comprehensive modelling, it is required to estimate the thermodynamic properties of many reactions and metabolites. 
 <!--JJ: Some numbers here about ratios of available compounds/reactions in models would be nice-->
-These estimation methods rely on experimental measurements of $\Delta_rG$.
+These estimation methods rely on experimental measurements of $\dgr$.
 @beberEQuilibratorPlatformEstimation2021 describes the software package and website eQuilibrator, which provides access
 to a large database of estimates and measurements derived from @goldbergThermodynamicsEnzymecatalyzedReactions2004 among other sources.
 <!--JJ: Could talk a bit more about data sources here-->
@@ -86,8 +85,8 @@ known as the 'reactant contribution' model:
 <!--JJ: This notation could be a bit more succinct-->
 \begin{align}
 y_i &\sim N(\hat{y}_i, \sigma) \label{eq-reactant-contribution} \\
-\hat{y}_i &= \Delta_rG_{reaction(i)}  \nonumber \\
-\Delta_rG &= S^\top\cdot \Delta_fG
+\hat{y}_i &= \dgr_{reaction(i)}  \nonumber \\
+\dgr &= S^\top\cdot \dgf
 \end{align}
 
 In equation \eqref{eq-reactant-contribution}, $reaction$ is a function mapping
@@ -120,7 +119,7 @@ and $size$ is a function mapping reaction indexes to measurement counts, so
 that $size(j)$ is the number of measurements of reaction $j$.
 
 \begin{equation}
-\bar{y}_j \sim N(\Delta_rG, \frac{\sigma}{size(j)}) \label{eq-rc-sufficient}
+\bar{y}_j \sim N(\dgr, \frac{\sigma}{size(j)}) \label{eq-rc-sufficient}
 \end{equation}
 
 This formulation is generally computationally preferable because the number of normal
@@ -141,21 +140,21 @@ The group contribution model adds to the generative model in equation
 is the stoichiometry-weighted sum of the formation energies of its constituent
 groups, i.e. the 'group contribution' model. In equation \eqref{eq-group-additivity},
 $G\in\mathbb{R}^{m\times g}$ is a group incidence matrix that maps combinations
-of $m$ compounds and $g$ groups to stoichiometric coefficients and $\Delta_gG$
+of $m$ compounds and $g$ groups to stoichiometric coefficients and $\dgg$
 is a vector of $g$ group formation energies.
 
 <!--I think we could make a distinction here between the dgr estimation and the dgf estimation. The more emphasis that we put on there being two estimates, the clearer it is later that we have two separate issues with them. I think we can also emphasise here that the dgr estimates also have the epsilon E[eps]=0, which is still important for variance estimates. -->
 \begin{equation}
-\Delta_fG = G\cdot\Delta_gG \label{eq-group-additivity}
+\dgf = G\cdot\dgg \label{eq-group-additivity}
 \end{equation}
 
-Using this model's estimates $\hat{\Delta_gG}$ for the parameters $\Delta _gG$,
+Using this model's estimates $\hat{\dgg}$ for the parameters $\Delta _gG$,
 the formation energy of an unmeasured compound composed of measured chemical
 groups can be estimated based on its group composition $\vec{g}$ using equation
 \eqref{eq-group-contribution-prediction}.
 
 \begin{equation}
-\hat{\Delta_fG} = \vec{g}\cdot \hat{\Delta_gG}\label{eq-group-contribution-prediction}
+\hat{\dgf} = \vec{g}\cdot \hat{\dgg}\label{eq-group-contribution-prediction}
 \end{equation}
 
 
@@ -180,12 +179,12 @@ necessarily equal to the group contribution estimate for compound $b$, i.e.
 <!--Same as above, I think we should start with the dgr estimate here (that is the true model that is fit, after all) and then move on to dgf. Also I think it should be clear that we're not stating this as fact, but that we're either quoting the authors or working within the limitations of the model formulation-->
 
 \begin{equation}
-\hat{\Delta_fG}_a=\vec{g}_{ab}\cdot\hat{\Delta_gG}=\hat{\Delta_fG}_b \label{eq-group-contribution-problem}
+\hat{\dgf}_a=\vec{g}_{ab}\cdot\hat{\dgg}=\hat{\dgf}_b \label{eq-group-contribution-problem}
 \end{equation}
 
 This implies that a reaction $j$ with stoichiometry $\vec{s}_j$ that converts
 $a$ into $b$ or vice versa will always have estimated standard condition Gibbs
-energy change $\hat{\Delta_rG}_j$ zero according to the group contribution
+energy change $\hat{\dgr}_j$ zero according to the group contribution
 model. According to equation \eqref{eq-thermodynamic-effect}, the group
 contribution model will therefore imply that the direction of reaction $j$
 depends only on the sign of the term $1 - \exp(RT \cdot
@@ -205,23 +204,23 @@ contradicting this.](./img/contradiction.svg){#fig-network}
 <!--Better explained as a lack of model expressiveness-->
 
 This feature of the group contribution model leads to a more practical
-modelling problem. If $\Delta_gG$ is estimated by maximum likelihood
+modelling problem. If $\dgg$ is estimated by maximum likelihood
 estimation, the covariance matrix of the estimator vector
-$\hat{\Delta_fG}=G\hat{\Delta_gG}$ is given by equation
+$\hat{\dgf}=G\hat{\dgg}$ is given by equation
 \eqref{eq-group-contribution-rank}:
 
 \begin{equation}
-Cov(\hat{\Delta_fG}) = G \cdot Var(\hat{\Delta_gG}) \cdot G^\top \label{eq-group-contribution-rank}
+Cov(\hat{\dgf}) = G \cdot Var(\hat{\dgg}) \cdot G^\top \label{eq-group-contribution-rank}
 \end{equation}
 
 This covariance matrix has the same rank as $G$ since for $A=B\cdot C$,
 $rank(A)=min(rank(B), rank(C))$. Therefore, in the typical case where the number
 of groups $g$ is less than the number of compounds $m$, the covariance matrix
-$Cov(\hat{\Delta_fG})$ is guaranteed to be rank-deficient. If
-$Cov(\hat{\Delta_fG})$ is used as the covariance matrix of a multivariate
+$Cov(\hat{\dgf})$ is guaranteed to be rank-deficient. If
+$Cov(\hat{\dgf})$ is used as the covariance matrix of a multivariate
 normal prior distribution in a Bayesian mechanistic metabolic model, the
 resulting posterior distribution will assign zero probability mass to some
-regions of $\Delta_fG$ space. If the true parameter allocation lies in such a
+regions of $\dgf$ space. If the true parameter allocation lies in such a
 region, the model will be irreparably biased and will also likely suffer from
 computational issues due to an unresolvable conflict between prior and
 likelihood.
@@ -253,44 +252,6 @@ issue more comprehensively.
 Finally, @sec-case-study describes how we compared our new models with the
 state of the art.
 
-## How big is the problem? {#sec-how-big-is-the-problem}
-
-Since there are multiple possible decompositions of compounds into chemical
-groups, it is not possible to say in general which reactions are affected by
-the issue we highlight with the group contribution model. However to get a
-general idea we used the group decomposition matrix from the `equilibrator-api`
-package . We then used the `e_coli_core` model from
-@orthReconstructionUseMicrobial2010, as exposed by the Python package `COBRApy`
-@ebrahimCOBRApyCOnstraintsBasedReconstruction2013, to identify important
-reactions that conserve groups according to this matrix. 
-
- <!--We could also look at the rank of the various matrices here?-->
-<!--Were any of these actually measured?-->
-
-We found 82 group-conserving reaction in the training dataset, 11 of which are
-also in the `e_coli_core` model. These reactions are shown below in
-@tbl-bad-reactions. 
-
-| description                                                                                                                    | EC number|
-|--------------------------------------------------------------------------------------------------------------------------------|----------|
-| alpha-D-Glucose 6-phosphate(aq) = beta-D-Glucose 6-phosphate(aq)                                                               | 2.7.4.3  |
-| 3-phosphonooxypyruvate(aq) + L-glutamate(aq) = 2-oxoglutarate(aq) + O-phospho-L-serine(aq)                                     | 2.7.1.40 |
-| UDPglucose(aq) = UDPgalactose(aq)                                                                                              | 1.6.1.1  |
-| 2'-deoxyinosine(aq) + adenine(aq) = 2'-deoxyadenosine(aq) + hypoxanthine(aq)                                                   | 5.3.1.9  |
-| 3-phosphonooxypyruvate(aq) + L-glutamate(aq) = 2-oxoglutarate(aq) + O-phospho-L-serine(aq)                                     | 5.3.1.6  |
-| UDPglucose(aq) = UDPgalactose(aq)                                                                                              | 4.2.1.2  |
-| N-succinyl-2-L-amino-6-oxoheptanedioate(aq) + L-glutamate(aq) = N-succinyl-L-2,6-diaminoheptanedioate(aq) + 2-oxoglutarate(aq) | 1.1.1.42 |
-| 3-phosphonooxypyruvate(aq) + L-glutamate(aq) = 2-oxoglutarate(aq) + O-phospho-L-serine(aq)                                     | 4.1.3.1  |
-| L-aspartate(aq) + 2-oxoglutarate(aq) = oxaloacetate(aq) + L-glutamate(aq)                                                      | 4.2.1.3  |
-| L-alanine(aq) + hydroxypyruvate(aq) = L-serine(aq) + pyruvate(aq)                                                              | 4.1.2.13 |
-| ATP(aq) + GDP(aq) = ADP(aq) + GTP(aq)                                                                                          | 4.2.1.11 |
-
-: Reactions in the `e_coli_core` model that conserve chemical groups according
-to the `equilibrator-api` group decomposition matrix, implying that their
-standard Gibbs energy of reaction is exactly zero according to the group
-contribution model. {#tbl-bad-reactions}
-
-<!--This would be the spot for the diagram of dgf that can't match-->
 ## Improved group contribution model {#sec-improved-group-contribution-model}
 
 <!--We need a new structure here to make both suggestions. Not totally sure how it should work-->
@@ -303,27 +264,27 @@ improved generative model is shown below in equation
 \eqref{eq-group-contribution-improved}.
 
 \begin{align}
-\bar{y}_j &\sim N(\Delta_rG_j, \frac{\sigma}{size(j)}) \label{eq-group-contribution-improved} \\
-\Delta_rG &= S^\top\cdot \Delta_fG \nonumber \\
-\Delta_fG &= G\cdot\Delta_gG + \vec{\eta} \nonumber
+\bar{y}_j &\sim N(\dgr_j, \frac{\sigma}{size(j)}) \label{eq-group-contribution-improved} \\
+\dgr &= S^\top\cdot \dgf \nonumber \\
+\dgf &= G\cdot\dgg + \vec{\eta} \nonumber
 \end{align}
 
 For a minimal change to the group contribution model we propose assuming
 $\vec{\eta}_i \sim N(0, \tau)$ for all compounds $i$, where
 $\tau\in\mathbb{R}^+$ is a known real number.
 
-This improved group contribution model has the same maximum likelhood estimator $\hat{\Delta_fG}$ as the current group contribution method. <!--I don't think this is true, e.g. if there is one outlier compound. Allowing it to vary will allow the coeffs for the others to be more normal.-->
-However in the improved model the covariance matrix $Cov(\hat{\Delta_fG})$ is found by equation \eqref{eq-improved-cov}.
+This improved group contribution model has the same maximum likelhood estimator $\hat{\dgf}$ as the current group contribution method. <!--I don't think this is true, e.g. if there is one outlier compound. Allowing it to vary will allow the coeffs for the others to be more normal.-->
+However in the improved model the covariance matrix $Cov(\hat{\dgf})$ is found by equation \eqref{eq-improved-cov}.
 
 <!--Is this really true? What if we have an outlier compound, for example? eta then absorbs this variance, making dGg different. I think I could come up with a counterexample-->
 
 \begin{align}
-  Cov(\hat{\Delta_fG}) &= G \cdot Var(\hat{\Delta_gG}) \cdot G^\top 
+  Cov(\hat{\dgf}) &= G \cdot Var(\hat{\dgg}) \cdot G^\top 
 \label{eq-improved-cov} \\
 &+ diag_m(\tau) \nonumber
 \end{align}
 
-In this model $Cov(\hat{\Delta_fG})$ is guaranteed to be full rank, as
+In this model $Cov(\hat{\dgf})$ is guaranteed to be full rank, as
 $diag_m(\tau)$ is full rank. The model, and prior distributions based on it,
 will therefore avoid the computational and theoretical issues and discussed in
 @sec-theoretical-problems-with-the-group-contribution-model.
@@ -350,7 +311,7 @@ This model is realised by augmenting the generative model in equation
 
 \begin{align}
 \vec{\eta} &\sim N(0, \tau) \label{eq-component-contribution-improved} \\
-\Delta_gG &\sim N(0, 5000) \nonumber \\
+\dgg &\sim N(0, 5000) \nonumber \\
 \tau &\sim HN(0, 3) \nonumber \\
 \sigma &\sim HN(0, 3) \nonumber \\
 \end{align}
@@ -362,7 +323,7 @@ numbers.
 
 <!--Nitpicking, but wouldn't it have to be normalised as well?-->
 
-The prior distribution for the group formation energy vector $\Delta_gG$ is
+The prior distribution for the group formation energy vector $\dgg$ is
 uninformative, whereas those for $\tau$, $\sigma$ and $\eta$ are informative.
 In particular, the prior distribution for $\eta$ is hierarchical as it involves
 the random variable $\tau$. This allows us to estimate the general accuracy of
@@ -374,52 +335,6 @@ there is very little prior information available about group formation
 energies, but there is information about measurement accuracy and the likely
 accuracy of the group additivity assumption.
 
-### QR reparameterisation {#sec-qr-reparameterisation}
-
-Since our model's joint posterior distribution cannot be calculated
-analytically and has many parameters, we decided to use Markov Chain Monte
-Carlo to perform posterior inference. This proved difficult under a naive
-parameterisation due to the collinearity induced by multiplying the parameter
-vector $\Delta_gG$ by the group decomposition matrix and then the
-stoichiometric matrix as shown in equation
-\eqref{eq-group-contribution-improved}. Due to these transformations, the
-information in the measurements relates to the underlying group formation
-energy parameters through linear projections determined by the matrix $S^\top
-G$. This structure induces a problematic posterior geometry that is difficult
-for a gradient-based MCMC sampler to traverse.
-
-<!--Specifically, this is because some compounds are only ever relative, right?-->
-<!--I don't quite understand why from this-->
-
-In order to address this issue we reparameterised our models using the thin QR
-decomposition. Specifically, we found matrices an orthonormal matrix
-$Q\in\mathbb{R}^{r\times g}$ and an upper triangular matrix
-$R\in\mathbb{R}^{g\times g}$ such that $Q\cdot R = S^\top\cdot G$. We could
-then express our model in terms of auxiliary parameters $\vec{q}$ as shown in
-\eqref{eq-qr}.
-
-\begin{align}
-Q^\star &= Q \cdot \sqrt{r - 1} \label{eq-qr} \\ 
-R^\star &= \frac{R}{\sqrt{r - 1}} \nonumber \\
-\Delta_rG &= Q^\star \cdot \vec{q} + S^\top \cdot \vec{\eta} \nonumber
-\end{align}
-
-In this parameterisation the formation energy parameters $\Delta_fG$ and
-$\Delta_gG$ can be recovered as shown in equation \eqref{eq-qr-recovery}, in
-which the superscript $^+$ represents the Moore-Penrose pseudo-inverse:
-
-\begin{align}
-\Delta_gG &= (R^\star)^+ \cdot \vec{q} \label{eq-qr-recovery}\\
-\Delta_fG &= G \cdot \Delta_gG + \eta \nonumber
-\end{align}
-
-This reparameterisation closely follows the advice on the relevant page of the
-Stan user's guide, which can be found
-[here](https://github.com/stan-dev/docs/blob/6b68270529344a30821ea20ae4ccebd4c1c60362/src/stan-users-guide/regression.Rmd#L149)
-in the exact form in which it was accessed.
-
-<!--Cool trick!-->
-<!--This also addresses the equilibrator problem?-->
 
 ## Estimating formation energies for unmeasured or unmodelled compounds {#sec-unmodelled-compounds}
 
@@ -433,14 +348,14 @@ included in our model. The procedure for doing this is as follows.
 2. If the compound was not included in the model, but is composed of included
    groups, then generate draws for the variable $\eta_{new}\in\mathbb{R}$ based
 on the marginal posterior samples for $\tau$, using the assumption
-$\eta_{new}\sim N(0, \tau)$. Now recover $\Delta_fG_{new}$ as in
+$\eta_{new}\sim N(0, \tau)$. Now recover $\dgf_{new}$ as in
 \eqref{eq-qr-recovery}.
 3. If the compound was not included in the model and is partly or wholly
    composed of $g_{new}$ un-modelled groups, generate draws for the missing
 group parameters $\vec{q}_{new}\in\mathbb{R}^{g_{new}}$ based on the prior
-distribution for $\vec{q}$. Next find $\Delta_gG_{new}$ using equation
+distribution for $\vec{q}$. Next find $\dgg_{new}$ using equation
 \eqref{eq-qr-recovery}, then generate $\eta_{new}$ and recover
-$\Delta_fG_{new}$ using the same method as for case 2.
+$\dgf_{new}$ using the same method as for case 2.
 
 While it is possible, using this procedure, to generate formation energy estimates for any compounds consistently with the information and assumptions in our model, the accuracy of the resulting estimates is limited by the information about the unmeasured or unmodelled compounds in the training data.
 In particular, formation energy estimates for compounds that include unmeasured chemical groups will typically be very wide, as our model assumes that there is little information available about the parameters $\vec{q}_{new}$.
@@ -450,11 +365,18 @@ We quantify the uncertainty of these different kinds of predictions in @sec-case
 
 ## Using our results for downstream modelling
 
-In order to use our model results for downstream modelling, for example as a prior distribution for thermodynamic parameters in a Bayesian kinetic model, we suggest fitting a multivariate normal distribution to our model's posterior $\Delta_fG$ parameter samples.
+In order to use our model results for downstream modelling, for example as a prior distribution for thermodynamic parameters in a Bayesian kinetic model, we suggest fitting a multivariate normal distribution to our model's posterior $\dgf$ parameter samples.
 The fit of our model is provided the resulting tables in [TODO: SAY WHERE].
 The code that produced these tables is available at [TODO: SAY WHERE].
 
 <!--Can we talk about how well they fit? Some measure of how well our samples actually fit this normal distribution?-->
+
+## Datasets
+<!--TODO: Check this reference and that it's the correct package. Add exact version as well of both packages-->
+We used the data of @noorConsistentEstimationGibbs2013 extracted from the python equilibrator API for model training and evaluation.
+This dataset is especially amenable to model training as extensive work, as described in @noorConsistentEstimationGibbs2013, has already been applied into adjusting a wide range of data to standard conditions. 
+Additionally, as a reference for metabolites and reactions of particular importance, we used the *e coli* core model of @orthReconstructionUseMicrobial2010 as provided in cobraPY @ebrahimCOBRApyCOnstraintsBasedReconstruction2013. 
+
 ## Model evaluation {#sec-case-study}
 
 In order to compare our new model with the state of the art, we compared our estimates to those of Equilibrator when fit on the entire component contribution dataset, and under cross-validation. 
@@ -464,30 +386,33 @@ We excluded from the test dataset all measurements of reactions involving the co
 There were 33 such reactions and 370 measurements.
  <!--Definitely needs to be fleshed out-->
 
-## Software
-
-We implemented our project using Python and structured it using the package `bibat` [TODO: INSERT CITATION].
-
-We used the package `equilibrator_api` to fetch the component contribution dataset and `cobrapy` to identify metabolites and reactions in the `e_coli_core` model.
-We carried out data cleaning, structuring and validation using `pydantic`, `pandera`, `numpy` and `pandas`.
-
-Our statistical models were written in the probabilistic programming language Stan @carpenterStanProbabilisticProgramming2017.
-Sampling was performed using `cmdstan` via the `cmdstanpy` interface.
-We used `arviz` to diagnose, structure and store our samples and for visualisation.
-
-All the code used to implement our analysis, and instructions for reproducing it, can be found at <https://github.com/biosustain/dgfreg>.
-
-<!--Love all the credit given here!-->
-<!--Can this be in the appendix?-->
-
 # Results
 
-## MCMC diagnostics
+## How big is the problem? {#sec-how-big-is-the-problem}
 
-For each of our models, we assessed convergence by running 4 MCMC chains and monitoring the improved $\hat{R}$ statistic proposed in @vehtariRankNormalizationFoldingLocalization2021, verifying that this number was close to 1 for all variables.
-We also measured the effective sample size per iteration, ensuring that this was not low enough to indicate improper sampling.
-Additionally, we checked that there were no post-warmup divergent transitions.
-<!--These should probably be reported-->
+Since there are multiple possible decompositions of compounds into chemical groups, it is not possible to say in general which reactions are affected by the issue we highlight with the group contribution model.
+Nevertheless, when observing the reactions of the *e coli* core model with the group matrix of Equilibrator we found 82 group-conserving reaction in the training dataset, 11 of which are also in the `e_coli_core` model.
+These reactions are shown below in @tbl-bad-reactions.
+
+| description                                                                                                                    | EC number|
+|--------------------------------------------------------------------------------------------------------------------------------|----------|
+| alpha-D-Glucose 6-phosphate(aq) = beta-D-Glucose 6-phosphate(aq)                                                               | 2.7.4.3  |
+| 3-phosphonooxypyruvate(aq) + L-glutamate(aq) = 2-oxoglutarate(aq) + O-phospho-L-serine(aq)                                     | 2.7.1.40 |
+| UDPglucose(aq) = UDPgalactose(aq)                                                                                              | 1.6.1.1  |
+| 2'-deoxyinosine(aq) + adenine(aq) = 2'-deoxyadenosine(aq) + hypoxanthine(aq)                                                   | 5.3.1.9  |
+| 3-phosphonooxypyruvate(aq) + L-glutamate(aq) = 2-oxoglutarate(aq) + O-phospho-L-serine(aq)                                     | 5.3.1.6  |
+| UDPglucose(aq) = UDPgalactose(aq)                                                                                              | 4.2.1.2  |
+| N-succinyl-2-L-amino-6-oxoheptanedioate(aq) + L-glutamate(aq) = N-succinyl-L-2,6-diaminoheptanedioate(aq) + 2-oxoglutarate(aq) | 1.1.1.42 |
+| 3-phosphonooxypyruvate(aq) + L-glutamate(aq) = 2-oxoglutarate(aq) + O-phospho-L-serine(aq)                                     | 4.1.3.1  |
+| L-aspartate(aq) + 2-oxoglutarate(aq) = oxaloacetate(aq) + L-glutamate(aq)                                                      | 4.2.1.3  |
+| L-alanine(aq) + hydroxypyruvate(aq) = L-serine(aq) + pyruvate(aq)                                                              | 4.1.2.13 |
+| ATP(aq) + GDP(aq) = ADP(aq) + GTP(aq)                                                                                          | 4.2.1.11 |
+
+: Reactions in the `e_coli_core` model that conserve chemical groups according
+to the `equilibrator-api` group decomposition matrix, implying that their
+standard Gibbs energy of reaction is exactly zero according to the group
+contribution model. {#tbl-bad-reactions}
+<!--This would be the spot for the diagram of dgf that can't match-->
 
 ## Assessment of model specification
 
@@ -528,7 +453,7 @@ It shows more explicitly than @fig-estimate-comparison that the new model tends 
 <!--TODO: Dashed lines for means and thinner-->
 ![Comparison of component contribution uncertainty interval widths with our model](plots/marginal_width_hists.svg){#fig-marginal-hist-widths}
 
-To compare model fit between our model and the component contribution model we found, for each measurement in the full dataset, the residual for the component contribution $\Delta_rG$ as well as the residual for our model's marginal posterior predictive mean.
+To compare model fit between our model and the component contribution model we found, for each measurement in the full dataset, the residual for the component contribution $\dgr$ as well as the residual for our model's marginal posterior predictive mean.
 A histogram of the results is shown in @fig-residuals-full-dataset, as well as the overall root mean squared error for each model.
 These results show that the two models achieved about the same level of fit to the data, with our model achieving slightly smaller errors on average.
 <!--Mention RMSE values in text here?-->
@@ -591,3 +516,74 @@ Another modelling approach that we did not explore attempts to infer formation e
 ## Extensions and future work
 
 We plan to augment our model with an application that can generate posterior summaries for unmodelled compounds as described in section @sec-unmodelled-compounds.
+
+# Appendix
+
+## Software
+
+We implemented our project using Python and structured it using the package `bibat` [TODO: INSERT CITATION].
+
+We used the package `equilibrator_api` to fetch the component contribution dataset and `cobrapy` to identify metabolites and reactions in the `e_coli_core` model.
+We carried out data cleaning, structuring and validation using `pydantic`, `pandera`, `numpy` and `pandas`.
+
+Our statistical models were written in the probabilistic programming language Stan @carpenterStanProbabilisticProgramming2017.
+Sampling was performed using `cmdstan` via the `cmdstanpy` interface.
+We used `arviz` to diagnose, structure and store our samples and for visualisation.
+
+All the code used to implement our analysis, and instructions for reproducing it, can be found at <https://github.com/biosustain/dgfreg>.
+
+<!--Love all the credit given here!-->
+
+### QR reparameterisation {#sec-qr-reparameterisation}
+
+Since our model's joint posterior distribution cannot be calculated
+analytically and has many parameters, we decided to use Markov Chain Monte
+Carlo to perform posterior inference. This proved difficult under a naive
+parameterisation due to the collinearity induced by multiplying the parameter
+vector $\dgg$ by the group decomposition matrix and then the
+stoichiometric matrix as shown in equation
+\eqref{eq-group-contribution-improved}. Due to these transformations, the
+information in the measurements relates to the underlying group formation
+energy parameters through linear projections determined by the matrix $S^\top
+G$. This structure induces a problematic posterior geometry that is difficult
+for a gradient-based MCMC sampler to traverse.
+
+<!--Specifically, this is because some compounds are only ever relative, right?-->
+<!--I don't quite understand why from this-->
+
+In order to address this issue we reparameterised our models using the thin QR
+decomposition. Specifically, we found matrices an orthonormal matrix
+$Q\in\mathbb{R}^{r\times g}$ and an upper triangular matrix
+$R\in\mathbb{R}^{g\times g}$ such that $Q\cdot R = S^\top\cdot G$. We could
+then express our model in terms of auxiliary parameters $\vec{q}$ as shown in
+\eqref{eq-qr}.
+
+\begin{align}
+Q^\star &= Q \cdot \sqrt{r - 1} \label{eq-qr} \\ 
+R^\star &= \frac{R}{\sqrt{r - 1}} \nonumber \\
+\dgr &= Q^\star \cdot \vec{q} + S^\top \cdot \vec{\eta} \nonumber
+\end{align}
+
+In this parameterisation the formation energy parameters $\dgf$ and
+$\dgg$ can be recovered as shown in equation \eqref{eq-qr-recovery}, in
+which the superscript $^+$ represents the Moore-Penrose pseudo-inverse:
+
+\begin{align}
+\dgg &= (R^\star)^+ \cdot \vec{q} \label{eq-qr-recovery}\\
+\dgf &= G \cdot \dgg + \eta \nonumber
+\end{align}
+
+This reparameterisation closely follows the advice on the relevant page of the
+Stan user's guide, which can be found
+[here](https://github.com/stan-dev/docs/blob/6b68270529344a30821ea20ae4ccebd4c1c60362/src/stan-users-guide/regression.Rmd#L149)
+in the exact form in which it was accessed.
+
+<!--Cool trick!-->
+<!--This also addresses the equilibrator problem?-->
+
+## MCMC diagnostics
+
+For each of our models, we assessed convergence by running 4 MCMC chains and monitoring the improved $\hat{R}$ statistic proposed in @vehtariRankNormalizationFoldingLocalization2021, verifying that this number was close to 1 for all variables.
+We also measured the effective sample size per iteration, ensuring that this was not low enough to indicate improper sampling.
+Additionally, we checked that there were no post-warmup divergent transitions.
+<!--These should probably be reported-->
