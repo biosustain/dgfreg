@@ -53,186 +53,151 @@ $$
 
 Reaction thermodynamics play an essential role in the accurate modelling of metabolic processes and are used to determine the the direction in which a chemical reaction proceeds.
 The Gibb's energy of a reaction (also referred to as the Gibb's *free* energy of reaction) represents the amount of usable energy released by a reaction.
-As it is a state function, the Gibbs energy of a reaction $\dgr$ is solely a function of the Gibb's energy of formation $\dgf$ of its substrates. This can be conveniently represented in linear algebraic form as:
+As it is a state function, the Gibbs energy of a reaction $\dgr$ is solely a function of the Gibb's energy of formation $\dgf$ of its substrates.
+This law can be conveniently represented in linear algebraic form as:
 \begin{align}
-\dgr &= \vec{s}^\top\cdot \dgf \\
+\dgr &= \vec{s}^\top\cdot \dgf \label{eq-dgr-dgf-law}
 
 \end{align}
-where $\vec{s}\in\mathbb{R}^n$ represents the stoichiometries of the substrates of the reactions.
+where $\vec{s}\in\mathbb{R}^n$ represents the stoichiometries of the substrates of the reaction.
 
-## Standard condition $\dgr$ measurements
+## Standard condition $\Delta_rG$ measurements
 
 <!--JJ - I think we could maybe expand a little here on the history of the estimation process and how its been applied-->
-Since not all biochemically important compounds' formation energies have been
-directly measured, for comprehensive modelling, it is required to estimate the thermodynamic properties of many reactions and metabolites. 
-<!--JJ: Some numbers here about ratios of available compounds/reactions in models would be nice-->
-These estimation methods rely on experimental measurements of $\dgr$.
-@beberEQuilibratorPlatformEstimation2021 describes the software package and website eQuilibrator, which provides access
-to a large database of estimates and measurements derived from @goldbergThermodynamicsEnzymecatalyzedReactions2004 among other sources.
+As not all biochemically important compounds' formation energies have been directly measured, for comprehensive modelling, it is required to estimate the thermodynamic properties of many reactions and metabolites.
+<!--JJ: Some numbers here about ratios of available compounds/reactions in models would be nice--> These estimation methods rely on experimental measurements of $\dgr$.
+@beberEQuilibratorPlatformEstimation2021 describes the software package and website eQuilibrator, which provides access to a large database of estimates and measurements derived from @goldbergThermodynamicsEnzymecatalyzedReactions2004 among other sources.
 <!--JJ: Could talk a bit more about data sources here-->
 
 ## The reactant contribution model
 
-<!--JJ: The reactant contribution model hasn't been introduced yet-->
-Given a set of $n$ measurements $y\in\mathbb{R}^n$ of $r$ reactions' standard
-condition Gibbs energy changes and a stoichiometric matrix
-$S\in\mathbb{R}^{m\times r}$ providing the stoichiometric coefficients of $m$
-compounds in each measured reaction, formation energies can be estimated using
-the generative model in equation \eqref{eq-reactant-contribution}, which is
-known as the 'reactant contribution' model:
-<!--JJ: Is it a generative model if we don't have priors over dgf? Maybe just worth introducting it as a standard linear regression? Check the original definition?-->
+<!--Comment here that this allows for new *reactions* to be predicted when they share compounds. Can be referenced again for dgg-->
+Given a set of $n$ measurements $y\in\mathbb{R}^n$ of $r$ reactions' standard condition Gibbs energy changes and a stoichiometric matrix $S\in\mathbb{R}^{m\times r}$ providing the stoichiometric coefficients of $m$ compounds in each measured reaction and a vector of errors $\epsilon_m \in \mathbb{R}^{n}$, formation energies can be estimated using the generative model in equation \eqref{eq-reactant-contribution}.
+This is known as the 'reactant contribution' model: 
 
-<!--JJ: This notation could be a bit more succinct-->
 \begin{align}
-y_i &\sim N(\hat{y}_i, \sigma) \label{eq-reactant-contribution} \\
-\hat{y}_i &= \dgr_{reaction(i)}  \nonumber \\
-\dgr &= S^\top\cdot \dgf
+y &= S^\top\cdot \dgf + \epsilon_m \label{eq-reactant-contribution} \\
+\epsilon_m &\sim N(\hat{y}_i, \sigma) \nonumber
 \end{align}
 
-In equation \eqref{eq-reactant-contribution}, $reaction$ is a function mapping
-measurement indices to columns of $S$, so that $reaction(i)$ is the index of
-the column of S that was measured by measurement $i$ and $\sigma\in\mathbb{R}$
-is a number representing the accuracy of the measurements.
-
-<!--Comment here that this allows for new *reactions* to be predicted when they share compounds. Can be referenced again for dgg-->
-
-@noorConsistentEstimationGibbs2013 describes how the reactant contribution
-model has been used to provide accurate estimates of biochemical formation
-energies. Unfortunately, the formation energies of many biochemical compounds
-cannot be estimated using the reactant contribution model because they do not
-participate in any measured reactions. 
-
-<!--Can be better explained with reference to the above comment-->
+Unfortunately, the formation energies of many biochemical compounds cannot be estimated using the reactant contribution model because they do not participate in any measured reactions.
 
 ### Reformulation using sufficient statistics {#sec-reformulation-using-sufficient-statistics}
 
 <!--Do we need this section at all?-->
 
-By averaging measurements of the same reaction, we can create the
-mathematically equivalent form of the reactant contribution model shown in
-equation \eqref{eq-rc-sufficient}. This model formulation takes advantage of
-the sufficient statistic that, for a sample of $size$ IID normal random
-variables $X \sim N(\mu, \sigma)$, the sample mean $\bar{X}$ has distribution
-$\bar{X}\sim N(\mu, \frac{\sigma}{\sqrt{size}})$. In equation
-\eqref{eq-rc-sufficient}, $\bar{y}_j$ is the mean measurement of reaction{j}
-and $size$ is a function mapping reaction indexes to measurement counts, so
-that $size(j)$ is the number of measurements of reaction $j$.
+By averaging measurements of the same reaction, we can create the mathematically equivalent form of the reactant contribution model shown in equation \eqref{eq-rc-sufficient}.
+This model formulation takes advantage of the sufficient statistic that, for a sample of $size$ IID normal random variables $X \sim N(\mu, \sigma)$, the sample mean $\bar{X}$ has distribution $\bar{X}\sim N(\mu, \frac{\sigma}{\sqrt{size}})$.
+In equation \eqref{eq-rc-sufficient}, $\bar{y}_j$ is the mean measurement of reaction{j} and $size$ is a function mapping reaction indexes to measurement counts, so that $size(j)$ is the number of measurements of reaction $j$.
 
 \begin{equation}
 \bar{y}_j \sim N(\dgr, \frac{\sigma}{size(j)}) \label{eq-rc-sufficient}
 \end{equation}
 
-This formulation is generally computationally preferable because the number of normal
-distribution densities to evaluate is the number of reactions $r$, which is
-usually less than the number of measurements $n$.
+This formulation is generally computationally preferable because the number of normal distribution densities to evaluate is the number of reactions $r$, which is usually less than the number of measurements $n$.
 
 ## The group contribution model
 
-<!--Maybe this whole section could be condensed a bit?-->
-<!--Explaining the group additivity assumption would help with the breakdown of the errors later-->
+The group contribution model addresses the reactant contribution model's lack of coverage by allowing some unmeasured compounds' formation energies to be estimated, provided these compounds are composed of measured chemical groups.
+The group contribution model adds to the generative model in equation \eqref{eq-rc-sufficient} the group additivity assumption \eqref{eq-group-additivity}, according to which a compound's formation energy is the stoichiometry-weighted sum of the formation energies of its constituent groups, i.e.
+the 'group contribution' model.
+In equation \eqref{eq-group-additivity}, $G\in\mathbb{R}^{m\times g}$ is a group incidence matrix that maps combinations of $m$ compounds and $g$ groups to stoichiometric coefficients and $\dgg$ is a vector of $g$ group formation energies.
 
-The group contribution model addresses the reactant contribution model's lack
-of coverage by allowing some unmeasured compounds' formation energies to be
-estimated, provided these compounds are composed of measured chemical groups.
-The group contribution model adds to the generative model in equation
-\eqref{eq-rc-sufficient} the group additivity assumption
-\eqref{eq-group-additivity}, according to which a compound's formation energy
-is the stoichiometry-weighted sum of the formation energies of its constituent
-groups, i.e. the 'group contribution' model. In equation \eqref{eq-group-additivity},
-$G\in\mathbb{R}^{m\times g}$ is a group incidence matrix that maps combinations
-of $m$ compounds and $g$ groups to stoichiometric coefficients and $\dgg$
-is a vector of $g$ group formation energies.
-
-<!--I think we could make a distinction here between the dgr estimation and the dgf estimation. The more emphasis that we put on there being two estimates, the clearer it is later that we have two separate issues with them. I think we can also emphasise here that the dgr estimates also have the epsilon E[eps]=0, which is still important for variance estimates. -->
 \begin{equation}
 \dgf = G\cdot\dgg \label{eq-group-additivity}
 \end{equation}
 
-Using this model's estimates $\hat{\dgg}$ for the parameters $\Delta _gG$,
-the formation energy of an unmeasured compound composed of measured chemical
-groups can be estimated based on its group composition $\vec{g}$ using equation
-\eqref{eq-group-contribution-prediction}.
+Ideally, a linear regression would be performed following the above equation with data on the formation energies of various compounds. 
+Unfortunately, it is much easier to collect data on $\dgr$ than $\dgf$ and thus, the linear regression was modified to relate $\dgr$ to group estimates, giving a final model relating parameters to data:
 
-\begin{equation}
-\hat{\dgf} = \vec{g}\cdot \hat{\dgg}\label{eq-group-contribution-prediction}
-\end{equation}
+\begin{align}
+\dgr &= S^{T}\cdot G \dgg + \epsilon \label{eq-group-contribution-final-estimate} \\ \epsilon &\sim N(0, \sigma) \nonumber
+\end{align}
 
+Note that \epsilon here represents both the measurement error $\epsilon_m$ of \eqref{eq-reactant-contribution} but also error that results from an incomplete model of formation energies, which we refer to herein as model error $\epsilon_o$
+That is, $\epsilon = $\epsilon_m$ + $\epsilon_o$. 
 
-## The component contribution model
+Using this model's estimates $\hat{\dgg}$ for the parameters $\Delta _gG$, the formation energy of an unmeasured compound involving groups $\vec{p}\in \mathbb{R}^g$ and the reaction energy of an unknown reaction with stoichiometry $\vec{q}\in \mathbb{R}^m$ can be calculated as follows
+\begin{align}
+\hat{\dgf} &= \vec{p}\cdot \hat{\dgg}\label{eq-group-contribution-prediction} \nonumber \\
+\hat{\dgr} &= \vec{q}\cdot G \hat{\dgg} \nonumber
+\end{align}
 
-@noorConsistentEstimationGibbs2013 proposes to use formation energy estimates
-from the reactant contribution model where possible, falling back to estimates
-from the group contribution model for unmeasured compounds composed of measured
-groups. This method is known as the 'component contribution' model. While there
-have been more recent efforts to more accurately capture the effect of
-experimental conditions, as described in @duEstimatingMetabolicEquilibrium2018
-and @beberEQuilibratorPlatformEstimation2021, the component contribution model
-remains the state of the art for estimating standard condition biochemical
-formation energies.
+Additionally, @noorConsistentEstimationGibbs2013 proposes the use of formation energy estimates from the reactant contribution model where possible, falling back to estimates from the group contribution model for unmeasured compounds composed of measured groups.
+This method is known as the 'component contribution' model.
+While there have been more recent efforts to more accurately capture the effect of experimental conditions, as described in @duEstimatingMetabolicEquilibrium2018 and @beberEQuilibratorPlatformEstimation2021, the component contribution model remains the state of the art for estimating standard condition biochemical formation energies.
 
-# Theoretical problem with the group contribution model {#sec-theoretical-problems-with-the-group-contribution-model}
+# Theoretical problems with the group contribution model {#sec-theoretical-problems-with-the-group-contribution-model}
 
-Suppose two compounds $a$ and $b$ have the same group composition
-$\vec{g}_{ab}$. Then the group contribution estimate for compound $a$ is
-necessarily equal to the group contribution estimate for compound $b$, i.e.
+There are a number of theoretical and practical limiations to the group contribution model shown in \eqref{eq-group-contribution-final-estimate}, all of which are related to how the model partitions variance.
+This estimate of the Gibbs energy of reaction has three sources of error: the error in the estimate $\hat{\dgg}$, which is normally distributed, the measurement error (usually assumed to be normally distributed) and finally the error that arises from model misspecification.
+That is: 
 
-<!--Same as above, I think we should start with the dgr estimate here (that is the true model that is fit, after all) and then move on to dgf. Also I think it should be clear that we're not stating this as fact, but that we're either quoting the authors or working within the limitations of the model formulation-->
+\begin{align} 
+cov(\hat{\dgg}) &= (\sigma_m^2 + \sigma_o^2)((SG)^T (SG))^{-1} \nonumber \\
+var(\epsilon_m) &= \sigma_m^2 \nonumber \\
+var(\epsilon_o) &= \sigma_o^2 \nonumber
+\end{align}
 
-\begin{equation}
-\hat{\dgf}_a=\vec{g}_{ab}\cdot\hat{\dgg}=\hat{\dgf}_b \label{eq-group-contribution-problem}
-\end{equation}
+As the amount of data increases, the estimation error decreases but the other two sources of error remain constant.
+For comparison, the reactant contribution model in \eqreq{eq-reactant-contribution-final-estimate} only has two sources of error: estimate error and measurement error.
+Model misspecification error does not apply because the additive relationship between $\dgr$ and $\dgf$ is a known physical law and true by definition.
+The problem stems from the fact that model mispecification errors are inherently a result of problems in the group contribution model and not the relationship between $\dgr$ and $\dgf$, yet the model is fit with additive errors on $\dgr$.
+This has a number of consequences.
+Firstly, it leads to violations in \eqref{eq-dgr-dgf-law}.
+For example, if we assume known measurements and parameters for the reactions A and B, both of which involve metabolites C and D, we get the following equation: \begin{align} dgr = S^T G \dgg + \epsilon_m \end{align} with realised values for $epsilon_m$ of x and y.
+However, C and D are not random variables giving $C-D\neq A$ and $C-D\neq B$.
 
-This implies that a reaction $j$ with stoichiometry $\vec{s}_j$ that converts
-$a$ into $b$ or vice versa will always have estimated standard condition Gibbs
-energy change $\hat{\dgr}_j$ zero according to the group contribution
-model. According to equation \eqref{eq-thermodynamic-effect}, the group
-contribution model will therefore imply that the direction of reaction $j$
-depends only on the sign of the term $1 - \exp(RT \cdot
-\frac{\vec{s}_j^\top\cdot\ln c}{RT})$, so that $v > 0$ if and only if $|a| <
-|b|$.
+Another consequence is the reduced degrees of freedom of $\dgf$.
+Because the group matrix $G$ necessarily has fewer groups than metabolites, $\dgf$ has degrees of freedom equivalent to Rank($G$), which does not allow support for the full range of formation energies.
+For example, metabolites C and D are composed of the same groups G, E and F.
+The group contriubtion model defines these metabolites as having the same formation energy.
+This considerably reduces the expressiveness of the model in the space of formation energies.
+Furthermore, because errors in group contribution are fundamentally errors at the level of $\dgf$ estimation, the group contribution model does not meet the assumption of iid $\epsilon$.
+For example, reactions that involve metabolites that are underestimated will have correlated, likely positive, residuals.
+This is explained further in @sec-residual-covariance.
 
-@fig-network illustrates how this feature of the group contribution model can
-lead to contradictions with quantitative metabolomics and fluxomics data.
+<!--Suppose two compounds $a$ and $b$ have the same group composition $\vec{g}_{ab}$.-->
+<!--Then the group contribution estimate for compound $a$ is necessarily equal to the group contribution estimate for compound $b$, i.e.-->
 
-![Example of the group contribution model contradicting experimental data. By
-construction the metabolites $a$ and $b$ have the same group decomposition, so
-that according to the group contribution model $v > 0$ if and only if $|a| <
-|b|$. However, $v$, $|a|$ and $|b|$ have been measured experimentally,
-contradicting this.](./img/contradiction.svg){#fig-network}
+<!--[>Same as above, I think we should start with the dgr estimate here (that is the true model that is fit, after all) and then move on to dgf. Also I think it should be clear that we're not stating this as fact, but that we're either quoting the authors or working within the limitations of the model formulation<]-->
 
-<!--We don't need this diagram-->
-<!--Better explained as a lack of model expressiveness-->
+<!--\begin{equation}-->
+<!--\hat{\dgf}_a=\vec{g}_{ab}\cdot\hat{\dgg}=\hat{\dgf}_b \label{eq-group-contribution-problem}-->
+<!--\end{equation}-->
 
-This feature of the group contribution model leads to a more practical
-modelling problem. If $\dgg$ is estimated by maximum likelihood
-estimation, the covariance matrix of the estimator vector
-$\hat{\dgf}=G\hat{\dgg}$ is given by equation
-\eqref{eq-group-contribution-rank}:
+<!--This implies that a reaction $j$ with stoichiometry $\vec{s}_j$ that converts-->
+<!--$a$ into $b$ or vice versa will always have estimated standard condition Gibbs-->
+<!--energy change $\hat{\dgr}_j$ zero according to the group contribution-->
+<!--model. According to equation \eqref{eq-thermodynamic-effect}, the group-->
+<!--contribution model will therefore imply that the direction of reaction $j$-->
+<!--depends only on the sign of the term $1 - \exp(RT \cdot-->
+<!--\frac{\vec{s}_j^\top\cdot\ln c}{RT})$, so that $v > 0$ if and only if $|a| <-->
+<!--|b|$.-->
+
+<!--@fig-network illustrates how this feature of the group contribution model can-->
+<!--lead to contradictions with quantitative metabolomics and fluxomics data.-->
+
+<!--![Example of the group contribution model contradicting experimental data. By-->
+<!--construction the metabolites $a$ and $b$ have the same group decomposition, so-->
+<!--that according to the group contribution model $v > 0$ if and only if $|a| <-->
+<!--|b|$. However, $v$, $|a|$ and $|b|$ have been measured experimentally,-->
+<!--contradicting this.](./img/contradiction.svg){#fig-network}-->
+
+<!--[>We don't need this diagram<]-->
+<!--[>Better explained as a lack of model expressiveness<]-->
+
+This feature of the group contribution model also leads to a more practical modelling problem.
+If $\dgg$ is estimated by maximum likelihood estimation, the covariance matrix of the estimator vector $\hat{\dgf}=G\hat{\dgg}$, as proposed in @beberEQuilibratorPlatformEstimation2021, is given by equation \eqref{eq-group-contribution-rank}:
 
 \begin{equation}
 Cov(\hat{\dgf}) = G \cdot Var(\hat{\dgg}) \cdot G^\top \label{eq-group-contribution-rank}
 \end{equation}
 
-This covariance matrix has the same rank as $G$ since for $A=B\cdot C$,
-$rank(A)=min(rank(B), rank(C))$. Therefore, in the typical case where the number
-of groups $g$ is less than the number of compounds $m$, the covariance matrix
-$Cov(\hat{\dgf})$ is guaranteed to be rank-deficient. If
-$Cov(\hat{\dgf})$ is used as the covariance matrix of a multivariate
-normal prior distribution in a Bayesian mechanistic metabolic model, the
-resulting posterior distribution will assign zero probability mass to some
-regions of $\dgf$ space. If the true parameter allocation lies in such a
-region, the model will be irreparably biased and will also likely suffer from
-computational issues due to an unresolvable conflict between prior and
-likelihood.
-
-<!--How does the above interact with the two compounds same groups thing? That's also a reduction in rank, no?-->
-
-<!--This causing a violation in thermodynamics-->
-
-  <!--- Problems with EQB covariance estimates  -->
-
-  <!--Diagram of pairwise predictions for dgf and dgr-->
-
+This covariance matrix has the same rank as $G$ since for $A=B\cdot C$, $rank(A)=min(rank(B), rank(C))$.
+Therefore, in the typical case where the number of groups $g$ is less than the number of compounds $m$, the covariance matrix $Cov(\hat{\dgf})$ is guaranteed to be rank-deficient.
+If $Cov(\hat{\dgf})$ is used as the covariance matrix of a multivariate normal prior distribution in a Bayesian mechanistic metabolic model, the resulting posterior distribution will assign zero probability mass to some regions of $\dgf$ space.
+If the true parameter allocation lies in such a region, the model will be irreparably biased and will also likely suffer from computational issues due to an unresolvable conflict between prior and likelihood.
 
 # Methods {#sec-methods}
 
