@@ -157,32 +157,32 @@ Furthermore, because errors in group contribution are fundamentally errors at th
 For example, reactions that involve metabolites that are underestimated will have correlated, likely positive, residuals.
 This is explained further in @sec-residual-covariance.
 
-<!--Suppose two compounds $a$ and $b$ have the same group composition $\vec{g}_{ab}$.-->
-<!--Then the group contribution estimate for compound $a$ is necessarily equal to the group contribution estimate for compound $b$, i.e.-->
+Suppose two compounds $a$ and $b$ have the same group composition $\vec{g}_{ab}$.
+Then the group contribution estimate for compound $a$ is necessarily equal to the group contribution estimate for compound $b$, i.e.
 
-<!--[>Same as above, I think we should start with the dgr estimate here (that is the true model that is fit, after all) and then move on to dgf. Also I think it should be clear that we're not stating this as fact, but that we're either quoting the authors or working within the limitations of the model formulation<]-->
+<!--Same as above, I think we should start with the dgr estimate here (that is the true model that is fit, after all) and then move on to dgf. Also I think it should be clear that we're not stating this as fact, but that we're either quoting the authors or working within the limitations of the model formulation-->
 
-<!--\begin{equation}-->
-<!--\hat{\dgf}_a=\vec{g}_{ab}\cdot\hat{\dgg}=\hat{\dgf}_b \label{eq-group-contribution-problem}-->
-<!--\end{equation}-->
+\begin{equation}
+\hat{\dgf}_a=\vec{g}_{ab}\cdot\hat{\dgg}=\hat{\dgf}_b \label{eq-group-contribution-problem}
+\end{equation}
 
-<!--This implies that a reaction $j$ with stoichiometry $\vec{s}_j$ that converts-->
-<!--$a$ into $b$ or vice versa will always have estimated standard condition Gibbs-->
-<!--energy change $\hat{\dgr}_j$ zero according to the group contribution-->
-<!--model. According to equation \eqref{eq-thermodynamic-effect}, the group-->
-<!--contribution model will therefore imply that the direction of reaction $j$-->
-<!--depends only on the sign of the term $1 - \exp(RT \cdot-->
-<!--\frac{\vec{s}_j^\top\cdot\ln c}{RT})$, so that $v > 0$ if and only if $|a| <-->
-<!--|b|$.-->
+This implies that a reaction $j$ with stoichiometry $\vec{s}_j$ that converts
+$a$ into $b$ or vice versa will always have estimated standard condition Gibbs
+energy change $\hat{\dgr}_j$ zero according to the group contribution
+model. According to equation \eqref{eq-thermodynamic-effect}, the group
+contribution model will therefore imply that the direction of reaction $j$
+depends only on the sign of the term $1 - \exp(RT \cdot
+\frac{\vec{s}_j^\top\cdot\ln c}{RT})$, so that $v > 0$ if and only if $|a| <
+|b|$.
 
-<!--@fig-network illustrates how this feature of the group contribution model can-->
-<!--lead to contradictions with quantitative metabolomics and fluxomics data.-->
+@fig-network illustrates how this feature of the group contribution model can
+lead to contradictions with quantitative metabolomics and fluxomics data.
 
-<!--![Example of the group contribution model contradicting experimental data. By-->
-<!--construction the metabolites $a$ and $b$ have the same group decomposition, so-->
-<!--that according to the group contribution model $v > 0$ if and only if $|a| <-->
-<!--|b|$. However, $v$, $|a|$ and $|b|$ have been measured experimentally,-->
-<!--contradicting this.](./img/contradiction.svg){#fig-network}-->
+![Example of the group contribution model contradicting experimental data. By
+construction the metabolites $a$ and $b$ have the same group decomposition, so
+that according to the group contribution model $v > 0$ if and only if $|a| <
+|b|$. However, $v$, $|a|$ and $|b|$ have been measured experimentally,
+contradicting this.](./img/contradiction.svg){#fig-network}
 
 <!--[>We don't need this diagram<]-->
 <!--[>Better explained as a lack of model expressiveness<]-->
@@ -355,6 +355,9 @@ There were 33 such reactions and 370 measurements.
 
 ## How big is the problem? {#sec-how-big-is-the-problem}
 
+In this section, we explore the dataset for instances of model misspecification and compare the fits of the GC, RC and HGC models with respect to the problems expounded in @sec-theoretical-problems-with-the-group-contribution-model. We begin by enumerating the reactions in the ecoli core model with no group changes and then explore the correlation between GC residuals, eta and compound etsimation error. 
+
+
 Since there are multiple possible decompositions of compounds into chemical groups, it is not possible to say in general which reactions are affected by the issue we highlight with the group contribution model.
 Nevertheless, when observing the reactions of the *e coli* core model with the group matrix of Equilibrator we found 82 group-conserving reaction in the training dataset, 11 of which are also in the `e_coli_core` model.
 These reactions are shown below in @tbl-bad-reactions.
@@ -377,7 +380,28 @@ These reactions are shown below in @tbl-bad-reactions.
 to the `equilibrator-api` group decomposition matrix, implying that their
 standard Gibbs energy of reaction is exactly zero according to the group
 contribution model. {#tbl-bad-reactions}
-<!--This would be the spot for the diagram of dgf that can't match-->
+
+## Residual correlation anaylsis
+
+As the relationship between $\dgf$ and $\dgr$ is a known physical property, we suspected that there may infact be correlation between the residuals of the group contribution model related to their shared metabolites.
+That is, the true error for GC $\hat{\dgr}$ is contained in deviations from true $\dgf$ values, and thus that the residuals will not satisfy the assumption that the elements of $\epsilon$ in \eqref{eq-group-contribuion-final-estimate} are *i.i.d*. 
+We should this relationship by first identifyng the deviation of GC dgf prediction from the true value. 
+As we do not have access to this value, we instead approximate it with the RC dgf estimates, which are known to be extremely accurate. 
+We then derive a measure of how much these differences have contributed to the prediction error by transforming them with the stoichiometric matrix:
+<!--TODO: ENTER EQN HERE-->
+
+As shown in @fig-cc-gc-diff-corr, we find that the residuals of the GC model fit are highly correlated with these deviations, suggesting $\dgf$ errors as the true source of error.
+Furthermore, we find that $\eta$ estimates are highly correlated with these deviations, suggesting that the HGC model is absorbing some of the prediction variance into $\eta$ as expected. 
+This is shown clearly in @fig-eta-cc-gc-diff-corr.
+This is further demonstrated by the estimated error scales of the various models.
+The HGC estimate of sigma is $\hat{\sigma_{hgc}}~=3.5$, which is closer to the estimated measurement error $\hat{\sigma_{rc}}~=2.7$ of the RC model than that of the group contribution model $\hat{\sigma{gc}}~=7.6$. 
+All of the above suggests a migration of variance from the noise term $\epsilon$ to the formation energy error $\eta$. 
+
+::: {layout-ncol=2}
+![Correlation between GC dgf error and residuals](plots/tfm-mean-GC-err-resid-corr.png){#fig-cc-gc-diff-corr}
+
+![Correlation between $\eta$ and dgf error and residuals](plots/eta-GC-err-corr.png){#fig-eta-cc-gc-diff-corr}
+:::
 
 ## Assessment of model specification
 
@@ -501,17 +525,10 @@ All the code used to implement our analysis, and instructions for reproducing it
 
 ### QR reparameterisation {#sec-qr-reparameterisation}
 
-Since our model's joint posterior distribution cannot be calculated
-analytically and has many parameters, we decided to use Markov Chain Monte
-Carlo to perform posterior inference. This proved difficult under a naive
-parameterisation due to the collinearity induced by multiplying the parameter
-vector $\dgg$ by the group decomposition matrix and then the
-stoichiometric matrix as shown in equation
-\eqref{eq-group-contribution-improved}. Due to these transformations, the
-information in the measurements relates to the underlying group formation
-energy parameters through linear projections determined by the matrix $S^\top
-G$. This structure induces a problematic posterior geometry that is difficult
-for a gradient-based MCMC sampler to traverse.
+Since our model's joint posterior distribution cannot be calculated analytically and has many parameters, we decided to use Markov Chain Monte Carlo to perform posterior inference.
+This proved difficult under a naive parameterisation due to the collinearity induced by multiplying the parameter vector $\dgg$ by the group decomposition matrix and then the stoichiometric matrix as shown in equation \eqref{eq-group-contribution-improved}.
+Due to these transformations, the information in the measurements relates to the underlying group formation energy parameters through linear projections determined by the matrix $S^\top G$.
+This structure induces a problematic posterior geometry that is difficult for a gradient-based MCMC sampler to traverse.
 
 <!--Specifically, this is because some compounds are only ever relative, right?-->
 <!--I don't quite understand why from this-->
