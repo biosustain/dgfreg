@@ -32,7 +32,8 @@ format:
     include-in-header: mathjax.html
     embed-resources: true
   docx: default
-  pdf: default
+  typst: 
+    section-numbering: 1.1.a
 ---
 
 # Abstract
@@ -194,7 +195,7 @@ lead to contradictions with quantitative metabolomics and fluxomics data.
 construction the metabolites $a$ and $b$ have the same group decomposition, so
 that according to the group contribution model $v > 0$ if and only if $|a| <
 |b|$. However, $v$, $|a|$ and $|b|$ have been measured experimentally,
-contradicting this.](./img/contradiction.svg){#fig-network}
+contradicting this.](./img/contradiction.svg){#fig-network width=90%}
 
 This feature of the group contribution model leads to a more practical
 modelling problem. If $\Delta_gG$ is estimated by maximum likelihood
@@ -493,9 +494,9 @@ measurements, with no particular patterns in the deviations, indicating a
 reasonably good. Figure @fig-ppc-kde shows that our model was able to achieve a
 good fit despite a somewhat unbalanced distribution of measurements.
 
-![Posterior predictive check](plots/marginal_ppc.svg){#fig-marginal-ppc}
+![Posterior predictive check](plots/marginal_ppc.svg){#fig-marginal-ppc width=80%}
 
-![Overall posterior predictive check](plots/ppc_kde.svg){#fig-ppc-kde}
+![Overall posterior predictive check](plots/ppc_kde.svg){#fig-ppc-kde width=80%}
 
 ## Posterior distributions of interesting parameters {#sec-posterior-distributions-of-interesting-parameters}
 
@@ -505,7 +506,7 @@ parameters' prior distributions. The plots show that the model was able to
 reconcile the data with our prior information, though it made $\tau_{group}$
 somewhat higher than we expected.
 
-![Posterior distributions of univariate model parameters](plots/posteriors.svg){#fig-posteriors}
+![Posterior distributions of univariate model parameters](plots/posteriors.svg){#fig-posteriors width=80%}
 
 ## Comparison with component contribution
 
@@ -519,7 +520,7 @@ fact that the red horizontal lines center on the black vertical line indicates
 that our model's central estimates tend to be very close to those of the
 component contribution model.
 
-![Comparison of component contribution estimates with our model](plots/marginal_dgf_comparison.svg){#fig-estimate-comparison}
+![Comparison of component contribution estimates with our model](plots/marginal_dgf_comparison.svg){#fig-estimate-comparison width=80%}
 
 @fig-marginal-hist-widths shows histograms of the 1%-99% marginal posterior
 widths for our model and the component contribution model. It shows more
@@ -527,7 +528,7 @@ explicitly than @fig-estimate-comparison that the new model tends to produce
 more uncertain marginal formation energy estimates than the component
 contribution model.
 
-![Comparison of component contribution uncertainty interval widths with our model](plots/marginal_width_hists.svg){#fig-marginal-hist-widths}
+![Comparison of component contribution uncertainty interval widths with our model](plots/marginal_width_hists.svg){#fig-marginal-hist-widths width=80%}
 
 To compare model fit between our model and the component contribution model we
 found, for each measurement in the full dataset, the residual for the component
@@ -538,7 +539,7 @@ each model. These results show that the two models achieved about the same
 level of fit to the data, with our model achieving slightly smaller errors on
 average.
 
-![Comparison of residuals](plots/in_sample_rmse_comparison.svg){#fig-residuals-full-dataset}
+![Comparison of residuals](plots/in_sample_rmse_comparison.svg){#fig-residuals-full-dataset width=80%}
 
 ## Out of sample predictions
 
@@ -559,7 +560,7 @@ contribution. @fig-residual-hist-test-dataset shows the distribution of
 residual differences for test measurements between the two models. For most
 test measurements our model made better predictions. 
 
-![Distribution of out of sample absolute residual differences](plots/out_of_sample_residual_hist.svg){#fig-residual-hist-test-dataset}
+![Distribution of out of sample absolute residual differences](plots/out_of_sample_residual_hist.svg){#fig-residual-hist-test-dataset width=80%}
 
 @fig-test-reaction-residuals shows, for each reaction except
 phosphoenolpyruvate mutase, our model's 1%-99% residual interval with respect
@@ -570,7 +571,7 @@ two models. It is clear from this plot that our model's posterior predictive
 means tended to make better out of sample predictions than component
 contribution.
 
-![Comparison of residuals](plots/out_of_sample_reaction_residuals.svg){#fig-test-reaction-residuals}
+![Comparison of residuals](plots/out_of_sample_reaction_residuals.svg){#fig-test-reaction-residuals width=80%}
 
 # Discussion
 
