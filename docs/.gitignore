@@ -1,4 +1,5 @@
 /.quarto/
+/plots
 *$*
 *.aux
 *.log
