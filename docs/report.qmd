@@ -76,7 +76,7 @@ where N(\mu, \sigma) follows the Stan notation, with mean $\mu$ and standard dev
 This also allows one to estimate $\dgr G^\degree$ for unmeasured reactions, as long as they only involve metabolites present in the model. 
 Unfortunately, in many cases, $\dgf$ cannot be estimated using RC because they do not participate in any measured reactions and $\dgr$ of many reactions cannot be estimated because they involve at least one substrate not in the dataset. 
 
-The group contribution (GC) model addresses the reactant contribution model's lack of coverage by allowing some unmeasured compounds' formation energies to be estimated, provided these compounds are composed of a set of predetermined chemical groups.
+The group contribution (GC) model addresses the reactant contribution model's lack of coverage by instead modelling the formation energies of compounds as the sum of a set of predetermined chemical groups.
 The group contribution model adds to the model in equation \eqref{eq-rc} the group additivity assumption \eqref{eq-group-additivity}, according to which a compound's formation energy is the stoichiometry-weighted sum of the formation energies of its constituent groups, i.e. the 'group contribution' model.
 In equation \eqref{eq-group-additivity}, $\mathbf{G}\in\mathbb{R}^{m\times g}$ is a group incidence matrix that maps combinations of $m$ compounds and $g$ groups to stoichiometric coefficients and $\dgg$ is a vector of $g$ group formation energies.
 
