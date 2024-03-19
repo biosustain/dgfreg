@@ -37,11 +37,9 @@ format:
 
 <!--Macros-->
 ::: {.hidden}
-$$
 \newcommand{\dgr}{\Delta_r}
 \newcommand{\dgf}{\Delta_f}
 \newcommand{\dgg}{\Delta_g}
-$$
 :::
 <!--End Macros-->
 
@@ -51,11 +49,10 @@ $$
 
 Reaction thermodynamics play an essential role in the accurate modelling of metabolic processes and are used to determine the the direction in which a chemical reaction proceeds.
 The Gibb's energy of a reaction (also referred to as the Gibb's *free* energy of reaction) represents the amount of usable energy released by a reaction.
-As it is a state function, the Gibbs energy of a reaction $\dgr G$ is solely a function of the Gibb's energy of formation $\dgr G$ of its substrates.
+As it is a state function, the Gibbs energy of a reaction $\dgr$ is solely a function of the Gibb's energy of formation $\dgr$ of its substrates.
 This law can be conveniently represented in linear algebraic form as:
 \begin{align}
-\dgr G &= \vec{s}^\top\cdot \dgf G \label{eq-dgr-dgf-law}
-
+\dgr G &= \vec{s}^\top\cdot \dgf G \label{eq-dgr-dgf-law} \\
 \end{align}
 where $\vec{s}\in\mathbb{R}^n$ represents the stoichiometries of the substrates of the reaction.
 
@@ -108,7 +105,11 @@ Additionally, @noorConsistentEstimationGibbs2013 proposes the use of formation e
 This method is known as the 'component contribution' model.
 While there have been more recent efforts to more accurately capture the effect of experimental conditions, as described in @duEstimatingMetabolicEquilibrium2018 and @beberEQuilibratorPlatformEstimation2021, the component contribution model remains the state of the art for estimating standard condition biochemical formation energies.
 
-<!--SECTION ON COVARIANCE ESTIMATION-->
+Additionally, estimates of variance are also important in a number of applications.
+For example, thermodynamic metabolic flux analysis originally required $\dgr$ marginal flux estimates, which was recently improved upon by <!--citation--> by making use of full covariance estimates of the same.
+In @beberEQuilibratorPlatformEstimation2021, the method for calculating full covariance estimates for both $\dgr$ and $\dgf$ is clearly described. 
+<!--Add covaraince estimation equations here-->
+
 
 ## Theoretical problems with the Group Contribution model {#sec-theoretical-problems-with-the-group-contribution-model}
 
@@ -128,7 +129,13 @@ Model misspecification error does not apply because the additive relationship be
 The problem stems from the fact that model mispecification errors are inherently a result of problems in the group contribution model and not the relationship between $\dgr$ and $\dgf$, yet the model is fit with additive errors on $\dgr$.
 This has a number of consequences.
 Firstly, it leads to violations in \eqref{eq-dgr-dgf-law}.
-For example, if we assume known measurements and parameters for the reactions A and B, both of which involve metabolites C and D, we get the following equation: \begin{align} dgr = S^\top \mathbf{G} \dgg + \epsilon_m \end{align} with realised values for $epsilon_m$ of x and y.
+For example, if we assume known measurements and parameters for the reactions A and B, both of which involve metabolites C and D, we get the following equation: 
+
+\begin{align} 
+dgr = S^\top \mathbf{G} \dgg + \epsilon_m 
+\end{align}
+
+with realised values for $epsilon_m$ of x and y.
 However, C and D are not random variables giving $C-D\neq A$ and $C-D\neq B$.
 
 Another consequence is the reduced degrees of freedom of $\dgf$.
@@ -279,6 +286,8 @@ This is shown clearly in @fig-eta-cc-gc-diff-corr.
 This is further demonstrated by the estimated error scales of the various models.
 The HGC estimate of sigma is $\hat{\sigma_{hgc}}~=3.49$, compared to the estimated measurement error $\hat{\sigma_{rc}}~=2.749$ of the RC model than that of the group contribution model $\hat{\sigma{gc}}~=7.6$. 
 All of the above suggests a migration of the variance from the noise term $\epsilon$ to the formation energy error $\eta$. 
+
+<!--Can there be an example here from reactions that are *only* from RC metabolites?-->
 
 ::: {layout-ncol=2}
 ![Correlation between GC dgf error and residuals](plots/tfm-mean-GC-err-resid-corr.png){#fig-cc-gc-diff-corr}
