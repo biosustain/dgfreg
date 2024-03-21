@@ -84,7 +84,7 @@ In equation \eqref{eq-group-additivity}, $\mathbf{G}\in\mathbb{R}^{m\times g}$ i
 As with $\dgr$ and $\dgf$, and because group matrix symbol $\mathbf{G}$ and the 'G' of the standard group energies $\dgg G^\degree$ can be easily confused, we refer herein to the standard group energies with $\dgg$. 
 Ideally, a linear regression would be performed following the above equation with data on the formation energies of various compounds. 
 However, to make use of the more prevalent $\dgr$ measurements, the linear regression relates $\dgr$ to group estimates:
-
+<!--Make note that this is the LR proposed in the original model-->
 \begin{align}
 \dgr &= S^{T}\cdot \mathbf{G} \dgg + \epsilon \label{eq-gc} \\ \epsilon &\sim N(0, \sigma) \nonumber
 \end{align}
@@ -92,7 +92,7 @@ However, to make use of the more prevalent $\dgr$ measurements, the linear regre
 Two things are of note here.
 Firstly, these two linear regressions represent fundamentally different relationships.
 \eqref{eq-rc} represents a fundamental physical law, while \eqref{eq-gc} represents a statistical approximation of a property that we desire to predict. 
-Relatedly, that \epsilon represents both the measurement error $\epsilon_m$ of \eqref{eq-reactant-contribution} but also error that results from an incomplete model of formation energies, which we refer to herein as model error $\epsilon_o$.
+Secondly, \epsilon represents both the measurement error $\epsilon_m$ of \eqref{eq-reactant-contribution} but also error that results from all other factors that affect formation energies that are not represented in this simple linear model over groups, which we refer to herein as model error $\epsilon_o$.
 That is, $\epsilon = \epsilon_m + \epsilon_o$. 
 
 Using this model's estimates $\hat{\dgg}$ for the parameters $\Delta _gG$, the formation energy of an unmeasured compound involving groups $\vec{p}\in \mathbb{R}^g$ and the reaction energy of an unknown reaction with stoichiometry $\vec{q}\in \mathbb{R}^m$ can be calculated as follows
@@ -114,7 +114,7 @@ In @beberEQuilibratorPlatformEstimation2021, the method for calculating full cov
 ## Theoretical problems with the Group Contribution model {#sec-theoretical-problems-with-the-group-contribution-model}
 
 There are a number of theoretical and practical limiations to the group contribution model shown in \eqref{eq-gc}, all of which are related to how the model partitions variance.
-This estimate of the Gibbs energy of reaction has three sources of error: the error in the estimate $\hat{\dgg}$, which is normally distributed, the measurement error (usually assumed to be normally distributed) and finally the error that arises from model misspecification.
+This estimate of the Gibbs energy of reaction $\dgr$ has three sources of error: the error in the estimate $\hat{\dgg}$, which is normally distributed, the measurement error (usually assumed to be normally distributed) and finally the error that arises from an imperfect model.
 That is: 
 
 \begin{align} 
@@ -126,20 +126,20 @@ var(\epsilon_o) &= \sigma_o^2 \nonumber
 As the amount of data increases, the estimation error decreases but the other two sources of error remain constant.
 For comparison, the reactant contribution model in \eqreq{eq-rc} only has two sources of error: estimate error and measurement error.
 Model misspecification error does not apply because the additive relationship between $\dgr$ and $\dgf$ is a known physical law and true by definition.
-The problem stems from the fact that model mispecification errors are inherently a result of problems in the group contribution model and not the relationship between $\dgr$ and $\dgf$, yet the model is fit with additive errors on $\dgr$.
+The problem stems from the fact that model mispecification errors are inherently a result of problems in the group contribution model and not the relationship between $\dgr$ and $\dgf$ (the known physical law), yet the model is fit with additive errors on $\dgr$.
 This has a number of consequences.
-Firstly, it leads to violations in \eqref{eq-dgr-dgf-law}.
+Firstly, it leads to violations in the state function \eqref{eq-dgr-dgf-law}.
 For example, if we assume known measurements and parameters for the reactions A and B, both of which involve metabolites C and D, we get the following equation: 
 
 \begin{align} 
-dgr = S^\top \mathbf{G} \dgg + \epsilon_m 
+\dgr = S^\top \mathbf{G} \dgg + \epsilon_m 
 \end{align}
 
-with realised values for $epsilon_m$ of x and y.
+with realised values for $\epsilon_m$ of x and y.
 However, C and D are not random variables giving $C-D\neq A$ and $C-D\neq B$.
 
 Another consequence is the reduced degrees of freedom of $\dgf$.
-Because the group matrix $\mathbf{G}$ necessarily has fewer groups than metabolites, $\dgf$ has degrees of freedom equivalent to Rank($\mathbf{G}$), which does not allow support for the full range of formation energies.
+In order to be useful, the group matrix $\mathbf{G}$ necessarily has fewer groups than metabolites, giving $\dgf$ degrees of freedom equivalent to Rank($\mathbf{G}$), which does not allow support for the full range of formation energies.
 For example, metabolites C and D are composed of the same groups G, E and F.
 The group contriubtion model defines these metabolites as having the same formation energy.
 This considerably reduces the expressiveness of the model in the space of formation energies.
@@ -147,8 +147,9 @@ Furthermore, because errors in group contribution are fundamentally errors at th
 For example, reactions that involve metabolites that are underestimated will have correlated, likely positive, residuals.
 This is explained further in @sec-model-misspec.
 
+<!--It should be stated that this is a manifestation of the rank problem above. Maybe shift this section up?-->
 Another problem is related to compounds that have the same group composition.
-Suppose two compounds $a$ and $b$ have the same group composition $\vec{g}_{ab}$.
+Suppose two compounds $a$ and $b$ have the same group composition vector $\vec{g}_{ab}$.
 Then the group contribution estimate for compound $a$ is necessarily equal to the group contribution estimate for compound $b$, i.e.
 
 <!--Same as above, I think we should start with the dgr estimate here (that is the true model that is fit, after all) and then move on to dgf. Also I think it should be clear that we're not stating this as fact, but that we're either quoting the authors or working within the limitations of the model formulation-->
