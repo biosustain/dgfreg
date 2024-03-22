@@ -56,21 +56,21 @@ This law can be conveniently represented in linear algebraic form as:
 \end{align}
 where $\vec{s}\in\mathbb{R}^n$ represents the stoichiometries of the substrates of the reaction.
 
-The Gibbs energy of a rection under standard conditions ($\Delta_r G^\degree$) has been recorded experimentally through the measurement of the equilibrium constants of a large number of common metabolic reactions and is related to the standard Gibbs energy of formation ($\Delta_f G^\degree$) of its substrates as per \eqnref{eq-dgr-dgf-law}. 
+The Gibbs energy of a rection under standard conditions $\Delta_r G^\degree$ has been recorded experimentally through the measurement of the equilibrium constants of a large number of common metabolic reactions and is related to the standard Gibbs energy of formation $\Delta_f G^\degree$ of its substrates as per \eqnref{eq-dgr-dgf-law}. 
 For ease of notation, we refer herein to the reaction and formation energies under standard conditions simply as $\dgr$ and $\dgf$ respectively.
 Measuring $\dgf$ is more difficult, but has been performed for a small number of compounds. <!--Which ones?-->
 These measurements are available in a number of different datasets @goldbergThermodynamicsEnzymecatalyzedReactions2004. <!--TECR DB + equilibrator. Others?-->
 <!--Who. Albery?--> Was able to considerably extend the reach of these datasets using what @noorConsistentEstimationGibbs2013 refers to as the Reactant Contribution (RC) method. 
 This method accurately estimates the standard Gibbs energies of formation $\dgf G^\degree$ of the substrates of reactions in the database by fitting a linear regression model. 
-More formally, given a set of $n$ measurements $y\in\mathbb{R}^n$ of the standard reaction energies $\dgr G^\degree$ of $r$ reactions' standard condition Gibbs energy changes and a stoichiometric matrix $S\in\mathbb{R}^{m\times r}$ providing the stoichiometric coefficients of $m$ compounds in each measured reaction and a vector of errors $\epsilon_m \in \mathbb{R}^{n}$, formation energies can be estimated using the generative model in equation \eqref{eq-reactant-contribution}.
+More formally, given a set of $n$ measurements $y\in\mathbb{R}^n$ of the standard reaction energies $\dgr G^\degree$ of $r$ reactions' standard condition Gibbs energy changes and a stoichiometric matrix $S\in\mathbb{R}^{m\times r}$ providing the stoichiometric coefficients of $m$ compounds in each measured reaction and a vector of errors $\epsilon_m \in \mathbb{R}^{n}$, formation energies can be estimated using the generative model in equation \eqref{eq-rc}.
 
 \begin{align}
-y &= S^\top\cdot \dgf G^\degree + \epsilon_m \label{eq-rc} \\
-\epsilon_m &\sim N(\hat{y}_i, \sigma) \nonumber
+&y = S^\top \dgf + \epsilon_m \label{eq-rc} \\
+&\epsilon_m \sim N(\hat{y}_i, \sigma) \nonumber
 \end{align}
 
-where N(\mu, \sigma) follows the Stan notation, with mean $\mu$ and standard deviation $\sigma$.
-This also allows one to estimate $\dgr G^\degree$ for unmeasured reactions, as long as they only involve metabolites present in the model. 
+where N($\mu$, $\sigma$) follows the Stan notation, with mean $\mu$ and standard deviation $\sigma$.
+This also allows one to estimate $\dgr$ for unmeasured reactions, as long as they only involve metabolites present in the model. 
 Unfortunately, in many cases, $\dgf$ cannot be estimated using RC because they do not participate in any measured reactions and $\dgr$ of many reactions cannot be estimated because they involve at least one substrate not in the dataset. 
 
 The group contribution (GC) model addresses the reactant contribution model's lack of coverage by instead modelling the formation energies of compounds as the sum of a set of predetermined chemical groups.
@@ -81,7 +81,7 @@ In equation \eqref{eq-group-additivity}, $\mathbf{G}\in\mathbb{R}^{m\times g}$ i
 \dgf = \mathbf{G}\cdot\dgg G^\degree \label{eq-group-additivity}
 \end{equation}
 
-As with $\dgr$ and $\dgf$, and because group matrix symbol $\mathbf{G}$ and the 'G' of the standard group energies $\dgg G^\degree$ can be easily confused, we refer herein to the standard group energies with $\dgg$. 
+As with $\dgr$ and $\dgf$, and because group matrix symbol $\mathbf{G}$ and the 'G' of the standard group energies $\dgg$ can be easily confused, we refer herein to the standard group energies with $\dgg$. 
 Ideally, a linear regression would be performed following the above equation with data on the formation energies of various compounds. 
 However, to make use of the more prevalent $\dgr$ measurements, the linear regression relates $\dgr$ to group estimates:
 <!--Make note that this is the LR proposed in the original model-->
@@ -148,7 +148,7 @@ For example, reactions that involve metabolites that are underestimated will hav
 This is explained further in @sec-model-misspec.
 
 <!--It should be stated that this is a manifestation of the rank problem above. Maybe shift this section up?-->
-Another problem is related to compounds that have the same group composition.
+One way in which the reduced degrees of freedom manifests is related to compounds that have the same group composition.
 Suppose two compounds $a$ and $b$ have the same group composition vector $\vec{g}_{ab}$.
 Then the group contribution estimate for compound $a$ is necessarily equal to the group contribution estimate for compound $b$, i.e.
 
