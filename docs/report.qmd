@@ -42,33 +42,37 @@ format:
 
 ## The thermodynamic effect on the rate of a biochemical reaction {#sec-thermodynamic-effect}
 
-Reaction thermodynamics play an essential role in the accurate modelling of metabolic processes and are used to determine the the direction in which a chemical reaction proceeds.
-The Gibb's energy of a reaction (or Gibb's **free** energy of reaction) represents the amount of usable energy released by a reaction <!-- TODO confirm --> and can be calculated as a function of the Gibb's energy of formation of its substrates. 
+Reaction thermodynamics play an essential role in the accurate modelling of metabolic processes and determine the direction in which a chemical reaction proceeds.
+The Gibbs free energy of a reaction represents the amount of usable energy that the reaction releases or stores and can be calculated as a function of the Gibbs energy of formation of its substrates and products. 
+
 Under standard conditions the overall rate $v$ of a reaction is given by:
-<!--JJ: I would maybe go with the TMFA eqns here instead. Otherwise it looks like a linear relationship between dgr and flux-->
+<!--JJ: I would maybe go with the TMFA eqns here instead. Otherwise it looks like a linear relationship between dgr and flux TG: Let's discuss this a bit more-->
 \begin{align}
+\Delta^rG &= \vec{s}^\top\cdot \Delta^fG \nonumber \\
+reversibility &= 1 - \exp(\Delta^rG + RT \cdot \frac{\vec{s}^\top\cdot\ln x}{RT}) \nonumber \\
 v &= reversibility \cdot \psi \label{eq-thermodynamic-effect} \\
-reversibility &= 1 - \exp(\Delta_rG + RT \cdot \frac{\vec{s}^\top\cdot\ln c}{RT}) \nonumber \\
-\Delta_rG &= \vec{s}^\top\cdot \Delta_fG \nonumber 
 \end{align}
-where, $n\in\mathbb{N}$ species depends on formation energies $\Delta_f
-G\in\mathbb{R}^n$, as well as stoichiometries $\vec{s}\in\mathbb{R}^n$,
-concentrations $c\in\mathbb{R}_+^n$, temperature $T\in \mathbb{R}_+$, gas
-constant $R\approx0.008314$ and non-thermodynamic effects $\psi \in
-\mathbb{R}_+$.
+where
+
+- There are $m\in\mathbb{N}$ species,
+- $\Delta^f G\in\mathbb{R}^m$ is a vector containing the Gibbs free energy of formation of each species,
+- $\vec{s}\in\mathbb{R}^m$ is a vector containing the stoichiometric coefficient of each species,
+- $x\in\mathbb{R}_+^m$ is a vector containing the concentration of each species temperature $T\in \mathbb{R}_+$, gas,
+- $R\in\mathbb{R}\approx0.008314$ is a positive scalar representing the gas constant,
+- $\psi \in \mathbb{R}_+$ is a positive scalar representing all non-thermodynamic contributions to the flux.
+
 From equation \eqref{eq-thermodynamic-effect}, it can be seen that the
 thermodynamic term $reversibility$ determines the direction of $v$ as well as
 affecting its magnitude. Accurate quantitative modelling of biochemical fluxes
 therefore requires careful estimation of formation energies.
 
-
-## Standard condition $\Delta_rG$ measurements
+## Standard condition $\Delta^rG$ measurements
 
 <!--JJ - I think we could maybe expand a little here on the history of the estimation process and how its been applied-->
 Since not all biochemically important compounds' formation energies have been
 directly measured, for comprehensive modelling, it is required to estimate the thermodynamic properties of many reactions and metabolites. 
 <!--JJ: Some numbers here about ratios of available compounds/reactions in models would be nice-->
-These estimation methods rely on experimental measurements of $\Delta_rG$.
+These estimation methods rely on experimental measurements of $\Delta^rG$ and $\Delta^fG$.
 @beberEQuilibratorPlatformEstimation2021 describes the software package and website eQuilibrator, which provides access
 to a large database of estimates and measurements derived from @goldbergThermodynamicsEnzymecatalyzedReactions2004 among other sources.
 <!--JJ: Could talk a bit more about data sources here-->
@@ -80,15 +84,14 @@ Given a set of $n$ measurements $y\in\mathbb{R}^n$ of $r$ reactions' standard
 condition Gibbs energy changes and a stoichiometric matrix
 $S\in\mathbb{R}^{m\times r}$ providing the stoichiometric coefficients of $m$
 compounds in each measured reaction, formation energies can be estimated using
-the generative model in equation \eqref{eq-reactant-contribution}, which is
+the measurement model in equation \eqref{eq-reactant-contribution}, which is
 known as the 'reactant contribution' model:
-<!--JJ: Is it a generative model if we don't have priors over dgf? Maybe just worth introducting it as a standard linear regression? Check the original definition?-->
+<!--JJ: Is it a generative model if we don't have priors over dgf? Maybe just worth introducting it as a standard linear regression? Check the original definition? TG: good point, I have removed "generative" from the whole paper to avoid confusion and used "measurement model" instead.-->
 
-<!--JJ: This notation could be a bit more succinct-->
+<!--JJ: This notation could be a bit more succinct TG: yep, shortened!-->
 \begin{align}
-y_i &\sim N(\hat{y}_i, \sigma) \label{eq-reactant-contribution} \\
-\hat{y}_i &= \Delta_rG_{reaction(i)}  \nonumber \\
-\Delta_rG &= S^\top\cdot \Delta_fG
+y_i &\sim N(\Delta^rG_{reaction(i)}, \sigma) \label{eq-reactant-contribution} \\
+\Delta^rG &= S^\top\cdot \Delta^fG \nonumber
 \end{align}
 
 In equation \eqref{eq-reactant-contribution}, $reaction$ is a function mapping
@@ -102,58 +105,47 @@ energies. Unfortunately, the formation energies of many biochemical compounds
 cannot be estimated using the reactant contribution model because they do not
 participate in any measured reactions. 
 
-### Reformulation using sufficient statistics {#sec-reformulation-using-sufficient-statistics}
+<!-- ### Reformulation using sufficient statistics {#sec-reformulation-using-sufficient-statistics} -->
 
 <!--Do we need this section at all?-->
 
-By averaging measurements of the same reaction, we can create the
-mathematically equivalent form of the reactant contribution model shown in
-equation \eqref{eq-rc-sufficient}. This model formulation takes advantage of
-the sufficient statistic that, for a sample of $size$ IID normal random
-variables $X \sim N(\mu, \sigma)$, the sample mean $\bar{X}$ has distribution
-$\bar{X}\sim N(\mu, \frac{\sigma}{\sqrt{size}})$. In equation
-\eqref{eq-rc-sufficient}, $\bar{y}_j$ is the mean measurement of reaction{j}
-and $size$ is a function mapping reaction indexes to measurement counts, so
-that $size(j)$ is the number of measurements of reaction $j$.
+<!-- By averaging measurements of the same reaction, we can create the mathematically equivalent form of the reactant contribution model shown in equation \eqref{eq-rc-sufficient}. This model formulation takes advantage of the sufficient statistic that, for a sample of $size$ IID normal random variables $X \sim N(\mu, \sigma)$, the sample mean $\bar{X}$ has distribution $\bar{X}\sim N(\mu, \frac{\sigma}{\sqrt{size}})$. In equation \eqref{eq-rc-sufficient}, $\bar{y}_j$ is the mean measurement of reaction{j} and $size$ is a function mapping reaction indexes to measurement counts, so that $size(j)$ is the number of measurements of reaction $j$. -->
 
-\begin{equation}
-\bar{y}_j \sim N(\Delta_rG, \frac{\sigma}{size(j)}) \label{eq-rc-sufficient}
-\end{equation}
+<!-- \begin{equation} -->
+<!-- \bar{y}_j \sim N(\Delta^rG, \frac{\sigma}{size(j)}) \label{eq-rc-sufficient} -->
+<!-- \end{equation} -->
 
-This formulation is generally computationally preferable because the number of normal
-distribution densities to evaluate is the number of reactions $r$, which is
-usually less than the number of measurements $n$.
+<!-- This formulation is generally computationally preferable because the number of normal distribution densities to evaluate is the number of reactions $r$, which is usually less than the number of measurements $n$. -->
 
 ## The group contribution model
 
-<!--Maybe this whole section could be condensed a bit?-->
+<!--JJ: Maybe this whole section could be condensed a bit?-->
 
 The group contribution model addresses the reactant contribution model's lack
 of coverage by allowing some unmeasured compounds' formation energies to be
 estimated, provided these compounds are composed of measured chemical groups.
-The group contribution model adds to the generative model in equation
+The group contribution model adds to the measurement model in equation
 \eqref{eq-rc-sufficient} the group additivity assumption
 \eqref{eq-group-additivity}, according to which a compound's formation energy
 is the stoichiometry-weighted sum of the formation energies of its constituent
 groups, i.e. the 'group contribution' model. In equation \eqref{eq-group-additivity},
 $G\in\mathbb{R}^{m\times g}$ is a group incidence matrix that maps combinations
-of $m$ compounds and $g$ groups to stoichiometric coefficients and $\Delta_gG$
+of $m$ compounds and $g$ groups to stoichiometric coefficients and $\Delta^gG$
 is a vector of $g$ group formation energies.
 
-<!--I think we could make a distinction here between the dgr estimation and the dgf estimation. The more emphasis that we put on there being two estimates, the clearer it is later that we have two separate issues with them. I think we can also emphasise here that the dgr estimates also have the epsilon E[eps]=0, which is still important for variance estimates. -->
+<!--JJ: I think we could make a distinction here between the dgr estimation and the dgf estimation. The more emphasis that we put on there being two estimates, the clearer it is later that we have two separate issues with them. I think we can also emphasise here that the dgr estimates also have the epsilon E[eps]=0, which is still important for variance estimates. -->
 \begin{equation}
-\Delta_fG = G\cdot\Delta_gG \label{eq-group-additivity}
+\Delta^fG = G\cdot\Delta^gG \label{eq-group-additivity}
 \end{equation}
 
-Using this model's estimates $\hat{\Delta_gG}$ for the parameters $\Delta _gG$,
+Using this model's estimates $\hat{\Delta^gG}$ for the parameters $\Delta^gG$,
 the formation energy of an unmeasured compound composed of measured chemical
 groups can be estimated based on its group composition $\vec{g}$ using equation
 \eqref{eq-group-contribution-prediction}.
 
 \begin{equation}
-\hat{\Delta_fG} = \vec{g}\cdot \hat{\Delta_gG}\label{eq-group-contribution-prediction}
+\hat{\Delta^fG} = \vec{g}\cdot \hat{\Delta^gG}\label{eq-group-contribution-prediction}
 \end{equation}
-
 
 ## The component contribution model
 
@@ -169,19 +161,17 @@ formation energies.
 
 # Theoretical problem with the group contribution model {#sec-theoretical-problems-with-the-group-contribution-model}
 
-Suppose two compounds $a$ and $b$ have the same group composition
-$\vec{g}_{ab}$. Then the group contribution estimate for compound $a$ is
-necessarily equal to the group contribution estimate for compound $b$, i.e.
+Suppose two compounds $a$ and $b$ have the same group composition $\vec{g}_{ab}$. Then the group contribution estimate $\hat{\Delta^fG_a}$ for compound $a$'s formation energy $\Delta^fG_a$ is necessarily equal to the group contribution estimate for compound $b$'s formation energy $\hat{\Delta^fG_b}$, i.e.
 
-<!--Same as above, I think we should start with the dgr estimate here (that is the true model that is fit, after all) and then move on to dgf. Also I think it should be clear that we're not stating this as fact, but that we're either quoting the authors or working within the limitations of the model formulation-->
+<!--JJ: Same as above, I think we should start with the dgr estimate here (that is the true model that is fit, after all) and then move on to dgf. Also I think it should be clear that we're not stating this as fact, but that we're either quoting the authors or working within the limitations of the model formulation-->
 
 \begin{equation}
-\hat{\Delta_fG}_a=\vec{g}_{ab}\cdot\hat{\Delta_gG}=\hat{\Delta_fG}_b \label{eq-group-contribution-problem}
+\hat{\Delta^fG}_a=\vec{g}_{ab}\cdot\hat{\Delta^gG}=\hat{\Delta^fG}_b \label{eq-group-contribution-problem}
 \end{equation}
 
 This implies that a reaction $j$ with stoichiometry $\vec{s}_j$ that converts
 $a$ into $b$ or vice versa will always have estimated standard condition Gibbs
-energy change $\hat{\Delta_rG}_j$ zero according to the group contribution
+energy change $\hat{\Delta^rG}_j$ zero according to the group contribution
 model. According to equation \eqref{eq-thermodynamic-effect}, the group
 contribution model will therefore imply that the direction of reaction $j$
 depends only on the sign of the term $1 - \exp(RT \cdot
@@ -198,23 +188,23 @@ that according to the group contribution model $v > 0$ if and only if $|a| <
 contradicting this.](./img/contradiction.svg){#fig-network width=90%}
 
 This feature of the group contribution model leads to a more practical
-modelling problem. If $\Delta_gG$ is estimated by maximum likelihood
+modelling problem. If $\Delta^gG$ is estimated by maximum likelihood
 estimation, the covariance matrix of the estimator vector
-$\hat{\Delta_fG}=G\hat{\Delta_gG}$ is given by equation
+$\hat{\Delta^fG}=G\hat{\Delta^gG}$ is given by equation
 \eqref{eq-group-contribution-rank}:
 
 \begin{equation}
-Cov(\hat{\Delta_fG}) = G \cdot Var(\hat{\Delta_gG}) \cdot G^\top \label{eq-group-contribution-rank}
+Cov(\hat{\Delta^fG}) = G \cdot Var(\hat{\Delta^gG}) \cdot G^\top \label{eq-group-contribution-rank}
 \end{equation}
 
 This covariance matrix has the same rank as $G$ since for $A=B\cdot C$,
 $rank(A)=min(rank(B), rank(C))$. Therefore, in the typical case where the number
-of groups $g$ is less than the number of compounds $m$, the covariance matrix
-$Cov(\hat{\Delta_fG})$ is guaranteed to be rank-deficient. If
-$Cov(\hat{\Delta_fG})$ is used as the covariance matrix of a multivariate
+of groups $g$ is fewer than the number of compounds $m$, the covariance matrix
+$Cov(\hat{\Delta^fG})$ is guaranteed to be rank-deficient. If
+$Cov(\hat{\Delta^fG})$ is used as the covariance matrix of a multivariate
 normal prior distribution in a Bayesian mechanistic metabolic model, the
 resulting posterior distribution will assign zero probability mass to some
-regions of $\Delta_fG$ space. If the true parameter allocation lies in such a
+regions of $\Delta^fG$ space. If the true parameter allocation lies in such a
 region, the model will be irreparably biased and will also likely suffer from
 computational issues due to an unresolvable conflict between prior and
 likelihood.
@@ -242,10 +232,10 @@ state of the art.
 ## How big is the problem? {#sec-how-big-is-the-problem}
 
 Since there are multiple possible decompositions of compounds into chemical
-groups, it is not possible to say in general which reactions are affected by
-the issue we highlight with the group contribution model. However to get a
+groups, it is not possible to say in general which reactions are impacted by
+the issue we highlight with the group contribution model. However, to get a
 general idea we used the group decomposition matrix from the `equilibrator-api`
-package . We then used the `e_coli_core` model from
+package. We then used the `e_coli_core` model from
 @orthReconstructionUseMicrobial2010, as exposed by the Python package `COBRApy`
 @ebrahimCOBRApyCOnstraintsBasedReconstruction2013, to identify important
 reactions that conserve groups according to this matrix. 
@@ -254,8 +244,8 @@ We found 82 group-conserving reaction in the training dataset, 11 of which are
 also in the `e_coli_core` model. These reactions are shown below in
 @tbl-bad-reactions. 
 
-See appendix [SAY WHERE] for code used to carry out this analysis.
-<!--I reckon we can just put the code up on github. As long as it's well organised people will be able to find it-->
+See the project GitHub repository for code used to carry out this analysis.
+<!--JJ: I reckon we can just put the code up on github. As long as it's well organised people will be able to find it TG: yep, changed-->
 
 | description                                                                                                                    | EC number|
 |--------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -276,42 +266,42 @@ to the `equilibrator-api` group decomposition matrix, implying that their
 standard Gibbs energy of reaction is exactly zero according to the group
 contribution model. {#tbl-bad-reactions}
 
-<!--This would be the spot for the diagram of dgf that can't match-->
+<!--JJ: This would be the spot for the diagram of dgf that can't match-->
 ## Improved group contribution model {#sec-improved-group-contribution-model}
 
-<!--We need a new structure here to make both suggestions. Not totally sure how it should work-->
+<!--JJ: We need a new structure here to make both suggestions. Not totally sure how it should work-->
 
 As a smallest possible adjustment to the group contribution model, we propose
 to add a vector of independent random variables $\vec{\eta}\in\mathbb{R}^m$ to
 the group contribution estimate in order to quantify the error due to compound
 formation energies differing from sums of group formation energies.  The
-improved generative model is shown below in equation
+improved measurement model is shown below in equation
 \eqref{eq-group-contribution-improved}.
 
 \begin{align}
-\bar{y}_j &\sim N(\Delta_rG_j, \frac{\sigma}{size(j)}) \label{eq-group-contribution-improved} \\
-\Delta_rG &= S^\top\cdot \Delta_fG \nonumber \\
-\Delta_fG &= G\cdot\Delta_gG + \vec{\eta} \nonumber
+\bar{y}_j &\sim N(\Delta^rG_j, \frac{\sigma}{size(j)}) \label{eq-group-contribution-improved} \\
+\Delta^rG &= S^\top\cdot \Delta^fG \nonumber \\
+\Delta^fG &= G\cdot\Delta^gG + \vec{\eta} \nonumber
 \end{align}
 
 For a minimal change to the group contribution model we propose assuming
 $\vec{\eta}_i \sim N(0, \tau)$ for all compounds $i$, where
 $\tau\in\mathbb{R}^+$ is a known real number.
 
-This improved group contribution model leads has the same maximum likelhood
-estimator $\hat{\Delta_fG}$ as the current group contribution method. However
-in the improved model the covariance matrix $Cov(\hat{\Delta_fG})$ is found by
+This improved group contribution model has the same maximum likelihood
+estimator $\hat{\Delta^fG}$ as the current group contribution method. However
+in the improved model the covariance matrix $Cov(\hat{\Delta^fG})$ is found by
 equation \eqref{eq-improved-cov}.
 
-<!--Is this really true? What if we have an outlier compound, for example? eta then absorbs this variance, making dGg different. I think I could come up with a counterexample-->
+<!--JJ: Is this really true? What if we have an outlier compound, for example? eta then absorbs this variance, making dGg different. I think I could come up with a counterexample-->
 
 \begin{align}
-  Cov(\hat{\Delta_fG}) &= G \cdot Var(\hat{\Delta_gG}) \cdot G^\top 
+  Cov(\hat{\Delta^fG}) &= G \cdot Var(\hat{\Delta^gG}) \cdot G^\top 
 \label{eq-improved-cov} \\
 &+ diag_m(\tau) \nonumber
 \end{align}
 
-In this model $Cov(\hat{\Delta_fG})$ is guaranteed to be full rank, as
+In this model $Cov(\hat{\Delta^fG})$ is guaranteed to be full rank, as
 $diag_m(\tau)$ is full rank. The model, and prior distributions based on it,
 will therefore avoid the computational and theoretical issues and discussed in
 @sec-theoretical-problems-with-the-group-contribution-model.
@@ -332,13 +322,13 @@ estimates derived from the more detailed statistical model described below in
 
 As an alternative to the component contribution model, we propose a
 hierarchical model which includes both compound-level and group-level effects.
-This model is realised by augmenting the generative model in equation
+This model is realised by augmenting the measurement model in equation
 \eqref{eq-group-contribution-improved} with the prior distributions in equation
 \eqref{eq-component-contribution-improved}:
 
 \begin{align}
 \vec{\eta} &\sim N(0, \tau) \label{eq-component-contribution-improved} \\
-\Delta_gG &\sim N(0, 5000) \nonumber \\
+\Delta^gG &\sim N(0, 5000) \nonumber \\
 \tau &\sim HN(0, 3) \nonumber \\
 \sigma &\sim HN(0, 3) \nonumber \\
 \end{align}
@@ -348,7 +338,7 @@ non-negative half-normal distribution, i.e. the distribution with normal
 distribution densities for non-negative numbers and zero density for negative
 numbers.
 
-The prior distribution for the group formation energy vector $\Delta_gG$ is
+The prior distribution for the group formation energy vector $\Delta^gG$ is
 uninformative, whereas those for $\tau$, $\sigma$ and $\eta$ are informative.
 In particular, the prior distribution for $\eta$ is hierarchical as it involves
 the random variable $\tau$. This allows us to estimate the general accuracy of
@@ -366,7 +356,7 @@ Since our model's joint posterior distribution cannot be calculated
 analytically and has many parameters, we decided to use Markov Chain Monte
 Carlo to perform posterior inference. This proved difficult under a naive
 parameterisation due to the collinearity induced by multiplying the parameter
-vector $\Delta_gG$ by the group decomposition matrix and then the
+vector $\Delta^gG$ by the group decomposition matrix and then the
 stoichiometric matrix as shown in equation
 \eqref{eq-group-contribution-improved}. Due to these transformations, the
 information in the measurements relates to the underlying group formation
@@ -374,10 +364,10 @@ energy parameters through linear projections determined by the matrix $S^\top
 G$. This structure induces a problematic posterior geometry that is difficult
 for a gradient-based MCMC sampler to traverse.
 
-<!--I don't quite understand why from this-->
+<!--JJ: I don't quite understand why from this-->
 
 In order to address this issue we reparameterised our models using the thin QR
-decomposition. Specifically, we found matrices an orthonormal matrix
+decomposition. Specifically, we found  an orthonormal matrix
 $Q\in\mathbb{R}^{r\times g}$ and an upper triangular matrix
 $R\in\mathbb{R}^{g\times g}$ such that $Q\cdot R = S^\top\cdot G$. We could
 then express our model in terms of auxiliary parameters $\vec{q}$ as shown in
@@ -386,16 +376,16 @@ then express our model in terms of auxiliary parameters $\vec{q}$ as shown in
 \begin{align}
 Q^\star &= Q \cdot \sqrt{r - 1} \label{eq-qr} \\ 
 R^\star &= \frac{R}{\sqrt{r - 1}} \nonumber \\
-\Delta_rG &= Q^\star \cdot \vec{q} + S^\top \cdot \vec{\eta} \nonumber
+\Delta^rG &= Q^\star \cdot \vec{q} + S^\top \cdot \vec{\eta} \nonumber
 \end{align}
 
-In this parameterisation the formation energy parameters $\Delta_fG$ and
-$\Delta_gG$ can be recovered as shown in equation \eqref{eq-qr-recovery}, in
+In this parameterisation the formation energy parameters $\Delta^fG$ and
+$\Delta^gG$ can be recovered as shown in equation \eqref{eq-qr-recovery}, in
 which the superscript $^+$ represents the Moore-Penrose pseudo-inverse:
 
 \begin{align}
-\Delta_gG &= (R^\star)^+ \cdot \vec{q} \label{eq-qr-recovery}\\
-\Delta_fG &= G \cdot \Delta_gG + \eta \nonumber
+\Delta^gG &= (R^\star)^+ \cdot \vec{q} \label{eq-qr-recovery}\\
+\Delta^fG &= G \cdot \Delta^gG + \eta \nonumber
 \end{align}
 
 This reparameterisation closely follows the advice on the relevant page of the
@@ -417,14 +407,14 @@ included in our model. The procedure for doing this is as follows.
 2. If the compound was not included in the model, but is composed of included
    groups, then generate draws for the variable $\eta_{new}\in\mathbb{R}$ based
 on the marginal posterior samples for $\tau$, using the assumption
-$\eta_{new}\sim N(0, \tau)$. Now recover $\Delta_fG_{new}$ as in
+$\eta_{new}\sim N(0, \tau)$. Now recover $\Delta^fG_{new}$ as in
 \eqref{eq-qr-recovery}.
 3. If the compound was not included in the model and is partly or wholly
    composed of $g_{new}$ un-modelled groups, generate draws for the missing
 group parameters $\vec{q}_{new}\in\mathbb{R}^{g_{new}}$ based on the prior
-distribution for $\vec{q}$. Next find $\Delta_gG_{new}$ using equation
+distribution for $\vec{q}$. Next find $\Delta^gG_{new}$ using equation
 \eqref{eq-qr-recovery}, then generate $\eta_{new}$ and recover
-$\Delta_fG_{new}$ using the same method as for case 2.
+$\Delta^fG_{new}$ using the same method as for case 2.
 
 While it is possible, using this procedure, to generate formation energy
 estimates for any compounds consistently with the information and assumptions
@@ -439,7 +429,7 @@ little information available about the parameters $\vec{q}_{new}$.
 In order to use our model results for downstream modelling, for example as a
 prior distribution for thermodynamic parameters in a Bayesian kinetic model, we
 suggest fitting a multivariate normal distribution to our model's posterior
-$\Delta_fG$ parameter samples. We have done this for our results and provide
+$\Delta^fG$ parameter samples. We have done this for our results and provide
 the resulting tables in [TODO: SAY WHERE]. The code that produced these tables is
 available at [TODO: SAY WHERE].
 
@@ -532,7 +522,7 @@ contribution model.
 
 To compare model fit between our model and the component contribution model we
 found, for each measurement in the full dataset, the residual for the component
-contribution $\Delta_rG$ as well as the residual for our model's marginal
+contribution $\Delta^rG$ as well as the residual for our model's marginal
 posterior predictive mean. A histogram of the results is shown in
 @fig-residuals-full-dataset, as well as the overall root mean squared error for
 each model. These results show that the two models achieved about the same
